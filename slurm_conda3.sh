@@ -17,17 +17,26 @@ export HYDRA_FULL_ERROR=1
 
 export MODEL=gpt2-xl
 export NUM_GPU=8
-
 export DEEPSPEED_CONFIG=$(realpath bsmetadata/deepspeed_configs/v2.json)
 export DATA_DIR=$(realpath /admin/home-jordiclive/local_data)
 echo "deepspeed_config_file: $DEEPSPEED_CONFIG"
 
-export MASTER_PORT=12802
-### get the first node name as master address - customized for vgg slurm
-### e.g. master(gnodee[2-5],gnoded1) == gnodee2
-master_addr=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
-export MASTER_ADDR=$master_addr"i"
-echo "MASTER_ADDR="$MASTER_ADDR
+
+echo myuser=`whoami`
+echo COUNT_NODE=$COUNT_NODE
+echo LD_LIBRARY_PATH = $LD_LIBRARY_PATH
+echo PATH = $PATH
+echo which mpicc `which mpicc`
+echo HOSTNAMES = $HOSTNAMES
+echo hostname = `hostname`
+echo MASTER_ADDR= $MASTER_ADDR
+echo MASTER_PORT= $MASTER_PORT
+
+H=`hostname`
+THEID=`echo -e $HOSTNAMES  | python3 -c "import sys;[sys.stdout.write(str(i)) for i,line in enumerate(next(sys.stdin).split(' ')) if line.strip() == '$H'.strip()]"`
+echo THEID=$THEID
+
+
 
 
 echo "compute_environment: LOCAL_MACHINE
@@ -35,10 +44,7 @@ deepspeed_config:
   deepspeed_config_file: $DEEPSPEED_CONFIG
 distributed_type: DEEPSPEED
 fp16: true
-machine_rank: 0
 main_training_function: main
-num_machines: 1
-num_processes: $NUM_GPU
 mixed_precision: fp16
 " > accelerate_config.yaml
 
@@ -46,7 +52,8 @@ mixed_precision: fp16
 export TRANSFORMERS_CACHE=/admin/home-jordiclive/transformers_cache
 export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
 
-srun accelerate launch --config_file accelerate_config.yaml --main_process_ip $MASTER_ADDR --main_process_port $MASTER_PORT bsmetadata/train.py --config-name v2 \
+
+srun accelerate launch --config_file accelerate_config.yaml --num_processes $(( 8 * $COUNT_NODE )) --num_machines $COUNT_NODE --machine_rank $THEID --main_process_ip $MASTER_ADDR --main_process_port $MASTER_PORT  bsmetadata/train.py --config-name v2 \
   model_name=$MODEL \
     data_config.train_file='*.jsonl.gz' \
     data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz' \
