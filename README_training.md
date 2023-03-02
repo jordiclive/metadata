@@ -4,11 +4,11 @@ This is a document for all the training related information.
 
 ## Huggingface org
 
-You need to join https://huggingface.co/bs-modeling-metadata to be able to access the training data.
+You need to join https://huggingface.co/datasets/bs-modeling-metadata to be able to access the training data.
 
 ## Dataset
 
-The whole dataset is in https://huggingface.co/bs-modeling-metadata/c4-en-html-with-metadata
+The whole dataset is in https://huggingface.co/datasets/bs-modeling-metadata/c4-en-html-with-metadata
 
 - Some files of the dataset have entity metadata, the rest does not. You can find the list of files with entity metadata in the code datasetv2.py
 
@@ -19,7 +19,7 @@ The whole dataset is in https://huggingface.co/bs-modeling-metadata/c4-en-html-w
 For historical reasons, the test set is one of the file in the dataset.
 It is the file `c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz` in the dataset. ***not sure about this*** need to ask @Mike.
 And we make a copy of it for each metadata type and removes the examples that does not have the metadata type.
-The datasets for each metadata type have this naming: https://huggingface.co/bs-modeling-metadata/c4-en-html-with-validation_metadata_website_desc
+The datasets for each metadata type have this naming: https://huggingface.co/datasets/bs-modeling-metadata/c4-en-html-with-validation_metadata_website_desc
 
 
 ### Training set
