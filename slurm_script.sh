@@ -10,7 +10,7 @@ export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 # be careful about the cache folder for Wandb
 export WANDB_MODE=offline
-
+export HYDRA_FULL_ERROR=1
 source /admin/home-jordiclive/jordan_meta/bin/activate
 cd /admin/home-jordiclive/metadata
 export TRANSFORMERS_CACHE=/admin/home-jordiclive/transformers_cache
