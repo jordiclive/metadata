@@ -1,8 +1,8 @@
 export MODEL=gpt2-xl
-export NUM_GPU=2
+export NUM_GPU=8
 
 export DEEPSPEED_CONFIG=$(realpath bsmetadata/deepspeed_configs/v2.json)
-export DATA_DIR=$(realpath local-data)
+export DATA_DIR=$(realpath /admin/home-jordiclive/local_data)
 echo "deepspeed_config_file: $DEEPSPEED_CONFIG"
 echo "compute_environment: LOCAL_MACHINE
 deepspeed_config:
