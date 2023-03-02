@@ -10,15 +10,13 @@ deepspeed_config:
 distributed_type: DEEPSPEED
 fp16: true
 machine_rank: 0
-main_process_ip: null
-main_process_port: null
 main_training_function: main
 num_machines: 1
 num_processes: $NUM_GPU 
 mixed_precision: fp16
 " > accelerate_config.yaml
 
-accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
+accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --main_process_port 8994 --config-name v2 \
   model_name=$MODEL \
     data_config.train_file='*.jsonl.gz' \
     data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz' \
@@ -27,5 +25,6 @@ accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --con
     data_config.metadata_config.metadata_list='[html]' \
     data_config.metadata_config.metadata_column_list='[html]' \
     out_dir=$HOME/tmp/metadata-run-html
+
     #out_dir=/mnt/ssd-1/bigscience-metadata/run1
     #data_config.train_file='c4-en-html_cc*.jsonl.gz' data_config.streaming=True out_dir=/mnt/ssd-1/bigscience-metadata/run1
