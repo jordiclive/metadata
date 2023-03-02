@@ -10,7 +10,8 @@ deepspeed_config:
 distributed_type: DEEPSPEED
 fp16: true
 machine_rank: 0
-main_process_port: 8993
+main_process_ip: null
+main_process_port: null
 main_training_function: main
 num_machines: 1
 num_processes: $NUM_GPU 
