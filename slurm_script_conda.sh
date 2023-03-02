@@ -12,6 +12,10 @@ export TRANSFORMERS_OFFLINE=1
 export WANDB_MODE=offline
 export HYDRA_FULL_ERROR=1
 
+
+export MASTER_PORT=8994
+
+
 source ~/miniconda3/bin/activate meta_conda
 cd /admin/home-jordiclive/metadata
 export TRANSFORMERS_CACHE=/admin/home-jordiclive/transformers_cache
