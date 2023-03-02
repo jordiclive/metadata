@@ -244,6 +244,8 @@ def main(args: CFG) -> None:
             "weight_decay": 0.0,
         },
     ]
+    use_deepspeed_optimzer = False
+    use_deepspeed_scheduler = False
     if use_deepspeed_optimzer:
         optimizer = DummyOptim(optimizer_grouped_parameters)
     else:
