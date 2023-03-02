@@ -20,4 +20,4 @@ export MASTER_PORT=8994
 cd /admin/home-jordiclive/metadata
 export TRANSFORMERS_CACHE=/admin/home-jordiclive/transformers_cache
 export CUDA_VISIBLE_DEVICES="2,3"
-srun bash experiments/hpsearch/test.sh
+srun CUDA_VISIBLE_DEVICES="2,3" bash experiments/hpsearch/test.sh
