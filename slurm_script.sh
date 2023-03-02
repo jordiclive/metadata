@@ -6,7 +6,10 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --output=%x_%j.out
 
-
+export HF_DATASETS_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+# be careful about the cache folder for Wandb
+export WANDB_MODE=offline
 
 source /admin/home-jordiclive/jordan_meta/bin/activate
 cd /admin/home-jordiclive/metadata

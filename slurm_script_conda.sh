@@ -6,7 +6,10 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --output=%x_%j.out
 
-
+export HF_DATASETS_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+# be careful about the cache folder for Wandb
+export WANDB_MODE=offline
 
 source ~/miniconda3/bin/activate meta_conda
 cd /admin/home-jordiclive/metadata
