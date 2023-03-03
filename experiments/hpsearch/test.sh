@@ -2,7 +2,7 @@ export MODEL=gpt2-xl
 export NUM_GPU=2
 
 export DEEPSPEED_CONFIG=$(realpath bsmetadata/deepspeed_configs/v2.json)
-export DATA_DIR=$(realpath local_data)
+export DATA_DIR=$(realpath local-data)
 echo "deepspeed_config_file: $DEEPSPEED_CONFIG"
 echo "compute_environment: LOCAL_MACHINE
 deepspeed_config:
