@@ -25,6 +25,6 @@ CUDA_VISIBLE_DEVICES=2,3 accelerate launch --config_file accelerate_config.yaml 
     data_config.preprocessing_num_workers=6  extra_steps_to_eval_save_at='[2,100,200,400,800]' \
     data_config.metadata_config.metadata_list='[html]' \
     data_config.metadata_config.metadata_column_list='[html]' \
-    out_dir=$HOME/tmp/metadata-run-html
+    out_dir=/fsx/home-jordiclive/tmp/metadata-run-html
     #out_dir=/mnt/ssd-1/bigscience-metadata/run1
     #data_config.train_file='c4-en-html_cc*.jsonl.gz' data_config.streaming=True out_dir=/mnt/ssd-1/bigscience-metadata/run1
