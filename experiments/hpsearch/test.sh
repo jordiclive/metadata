@@ -18,7 +18,7 @@ num_processes: $NUM_GPU
 mixed_precision: fp16
 " > accelerate_config.yaml
 
-accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
+CUDA_VISIBLE_DEVICES=2,3 accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
   model_name=$MODEL \
     data_config.train_file='*.jsonl.gz' \
     data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz' \
