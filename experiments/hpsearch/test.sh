@@ -17,7 +17,7 @@ num_machines: 1
 mixed_precision: fp16
 " > accelerate_config.yaml
 
-CUDA_VISIBLE_DEVICES=2,3 accelerate launch --config_file --num_processes -1  accelerate_config.yaml bsmetadata/train.py --config-name v2 \
+CUDA_VISIBLE_DEVICES=2,3 accelerate launch --config_file  accelerate_config.yaml --num_processes -1 bsmetadata/train.py --config-name v2 \
   model_name=$MODEL \
     data_config.train_file='*.jsonl.gz' \
     data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz' \
