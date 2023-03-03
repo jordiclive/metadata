@@ -18,7 +18,7 @@ export HYDRA_FULL_ERROR=1
 export MODEL=gpt2-xl
 export NUM_GPU=8
 export DEEPSPEED_CONFIG=$(realpath bsmetadata/deepspeed_configs/v2.json)
-export DATA_DIR=$(realpath local_data)
+export DATA_DIR=$(realpath local-data)
 echo "deepspeed_config_file: $DEEPSPEED_CONFIG"
 
 
