@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --output=%x_%j.out
 source ~/miniconda3/bin/activate meta_conda
-cd /fsx/home-jordiclive/metadata2/metadata
+cd /fsx/home-jordiclive/metadata
 
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
