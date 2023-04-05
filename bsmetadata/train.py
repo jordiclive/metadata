@@ -384,9 +384,10 @@ def main(args: CFG) -> None:
 
     if not args.do_train and not args.do_eval:
         return
+    os.environ['WANDB_API_KEY'] = 'd8216641d549f9bb3d0c5074baa39e15dfd55030'
 
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
-    metrics_logger = Logger(is_local_main_process, project=args.project_name, config=config_dict)
+    metrics_logger = Logger(is_local_main_process, entity='jordanclive',project=args.project_name, config=config_dict)
 
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:

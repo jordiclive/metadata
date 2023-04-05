@@ -13,7 +13,7 @@ export TRANSFORMERS_CACHE=/fsx/home-jordiclive/transformers_cache
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 # be careful about the cache folder for Wandb
-export WANDB_MODE=offline
+#export WANDB_MODE=offline
 export HYDRA_FULL_ERROR=1
 
 
