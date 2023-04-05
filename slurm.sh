@@ -15,7 +15,6 @@ export WANDB_MODE=offline
 export HYDRA_FULL_ERROR=1
 
 
-export MODEL=gpt2-xl
 export NUM_GPU=8
 export DEEPSPEED_CONFIG=$(realpath bsmetadata/deepspeed_configs/v3.json)
 export DATA_DIR=$(realpath local-data)
@@ -36,12 +35,4 @@ num_processes: -1
 mixed_precision: fp16
 " > accelerate_config.yaml
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
-  model_name=$MODEL \
-  out_dir=/fsx/home-jordiclive/tmp/metadata-run-html
-#    data_config.train_file='*.jsonl.gz' \
-#    data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz' \
-#    data_config.dataset_name=$DATA_DIR \
-#    data_config.preprocessing_num_workers=6  extra_steps_to_eval_save_at='[2,100,200,400,800]' \
-#    data_config.metadata_config.metadata_list='[html]' \
-#    data_config.metadata_config.metadata_column_list='[html]' \
-#    out_dir=/fsx/home-jordiclive/tmp/metadata-run-html
+

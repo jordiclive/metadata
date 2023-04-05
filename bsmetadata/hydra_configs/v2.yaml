@@ -96,8 +96,8 @@ max_train_steps: 100000
 lr_scheduler_type: linear
 num_warmup_steps: 6000
 seed: 42
-out_dir: metadata_outputs/
-model_name: gpt2
+out_dir: /fsx/home-jordiclive/tmp/metadata-run-html
+model_name: gpt2-xl
 project_name: metadata_lm
 jobid: ''
 start_with_eval: false
