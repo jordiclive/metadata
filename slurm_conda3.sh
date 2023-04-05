@@ -5,7 +5,7 @@
 #SBATCH --gres=gpu:8
 #SBATCH --ntasks-per-node=8
 #SBATCH --output=%x_%j.out
-source ~/miniconda3/bin/activate meta_conda
+source /fsx/home-jordiclive/miniconda3/bin/activate meta_conda
 cd /fsx/home-jordiclive/metadata
 export TRANSFORMERS_CACHE=/fsx/home-jordiclive/transformers_cache
 
