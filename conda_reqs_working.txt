@@ -14,7 +14,6 @@ botocore==1.29.106
 bpemb==0.3.4
 brotlipy==0.7.0
 bs-dateutil @ git+https://github.com/cccntu/dateutil.git@86ab39008e6eddce2b0837553d9ff42aee25c783
--e git+https://github.com/jordiclive/metadata@7957b384cebf845d9ce1e61e685a433140341e92#egg=bsmetadata
 cachetools==5.3.0
 certifi==2022.12.7
 cffi @ file:///tmp/build/80754af9/cffi_1636541934635/work
