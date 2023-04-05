@@ -7,6 +7,7 @@
 #SBATCH --output=%x_%j.out
 source ~/miniconda3/bin/activate meta_conda
 cd /fsx/home-jordiclive/metadata
+export TRANSFORMERS_CACHE=/fsx/home-jordiclive/transformers_cache
 
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
