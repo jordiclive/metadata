@@ -100,27 +100,27 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id):
     print(f"{len(files_with_entities)} files with entities")
     print(f"{len(files_without_entities)} ")
 
-    files_without_entities = [files_with_entities[-1]]
-    files_with_entities = files_with_entities[:-1]
-    print(f"{len(files_with_entities)} files with entities")
-    print(f"{len(files_without_entities)} ")
-
-    data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
-    data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
-    print(float(len(files_with_entities)), float(len(files_without_entities)))
-    data = tf.data.Dataset.sample_from_datasets(
-        [data_with_entities, data_without_entities],
-        weights=[float(len(files_with_entities)), float(len(files_without_entities))],
-        seed=42,
-    )
-    #todo modified
+    # files_without_entities = [files_with_entities[-1]]
+    # files_with_entities = files_with_entities[:-1]
+    # print(f"{len(files_with_entities)} files with entities")
+    # print(f"{len(files_without_entities)} ")
+    #
     # data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
-    # # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
+    # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
+    # print(float(len(files_with_entities)), float(len(files_without_entities)))
     # data = tf.data.Dataset.sample_from_datasets(
-    #     [data_with_entities],
-    #     weights=[float(len(files_with_entities))],
+    #     [data_with_entities, data_without_entities],
+    #     weights=[float(len(files_with_entities)), float(len(files_without_entities))],
     #     seed=42,
     # )
+    #todo modified
+    data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
+    # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
+    data = tf.data.Dataset.sample_from_datasets(
+        [data_with_entities],
+        weights=[float(len(files_with_entities))],
+        seed=42,
+    )
 
     data = data.shuffle(1000, reshuffle_each_iteration=True)
     data = data.batch(data_config.per_device_train_batch_size)
