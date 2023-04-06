@@ -9,5 +9,5 @@ import huggingface_hub
 
 import huggingface_hub
 
-huggingface_hub.snapshot_download(repo_id='bs-modeling-metadata/c4-en-html-with-training_metadata_all',cache_dir='local-data')
+huggingface_hub.snapshot_download(repo_id='bs-modeling-metadata/c4-en-html-with-training_metadata_all',cache_dir='local-data',repo_type='dataset')
 
