@@ -278,7 +278,7 @@ def main(args: CFG) -> None:
             )
         )
         new_tokens = [
-            AddedToken(token, rstrip=True, lstrip=True, single_word=False, normalized=False) for token in new_tokens
+            AddedToken(token, rstrip=False, lstrip=True, single_word=False, normalized=False) for token in new_tokens
         ]
         tokenizer = AutoTokenizer.from_pretrained(args.model_name, additional_special_tokens=new_tokens)
     else:
