@@ -476,7 +476,7 @@ def main(args: CFG) -> None:
                 optimizer.zero_grad()
 
             step_loss_gathered = accelerator.gather(step_loss).mean().item()
-            if step < 3:
+            if step < 20:
                 metrics = {
                     "loss": step_loss_gathered,
                     "lr": 0,
