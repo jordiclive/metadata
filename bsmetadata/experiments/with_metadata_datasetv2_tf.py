@@ -98,13 +98,21 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id):
     files_with_entities = [x for x in file_paths if x.name in data_files_with_entities]
     files_without_entities = [x for x in file_paths if x.name not in data_files_with_entities]
     print(f"{len(files_with_entities)} files with entities")
-    print(f"{len(files_without_entities)} files without entities")
+    print(f"{len(files_without_entities)} ")
 
+    # data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
+    # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
+    # data = tf.data.Dataset.sample_from_datasets(
+    #     [data_with_entities, data_without_entities],
+    #     weights=[float(len(files_with_entities)), float(len(files_without_entities))],
+    #     seed=42,
+    # )
+    #todo modified
     data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
-    data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
+    # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
     data = tf.data.Dataset.sample_from_datasets(
-        [data_with_entities, data_without_entities],
-        weights=[float(len(files_with_entities)), float(len(files_without_entities))],
+        [data_with_entities],
+        weights=[float(len(files_with_entities))],
         seed=42,
     )
 
