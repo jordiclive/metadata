@@ -41,6 +41,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file accelerate_
   model_name=$MODEL \
   data_config.dataset_name=$DATA_DIR \
   data_config.train_file='*.jsonl.gz' \
+  data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' \
   out_dir=/fsx/home-jordiclive/tmp/metadata-run-html
 
 
