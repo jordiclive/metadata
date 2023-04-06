@@ -100,6 +100,9 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id):
     print(f"{len(files_with_entities)} files with entities")
     print(f"{len(files_without_entities)} ")
 
+    files_without_entities = [files_without_entities[-1]]
+    files_with_entities = files_with_entities[:-1]
+
     data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
     data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
     data = tf.data.Dataset.sample_from_datasets(
