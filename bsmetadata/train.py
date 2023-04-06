@@ -476,11 +476,18 @@ def main(args: CFG) -> None:
                 optimizer.zero_grad()
 
             step_loss_gathered = accelerator.gather(step_loss).mean().item()
-            metrics = {
-                "loss": step_loss_gathered,
-                "lr": max(scheduler.get_last_lr()),
-                "gradient_step": train_state.completed_steps,
-            }
+            if step < 3:
+                metrics = {
+                    "loss": step_loss_gathered,
+                    "lr": 0,
+                    "gradient_step": train_state.completed_steps,
+                }
+            else:
+                metrics = {
+                    "loss": step_loss_gathered,
+                    "lr": max(scheduler.get_last_lr()),
+                    "gradient_step": train_state.completed_steps,
+                }
             if not args.data_config.streaming:
                 metrics["epoch"] = step / len(train_dataloader)
 
