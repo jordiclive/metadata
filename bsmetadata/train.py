@@ -283,6 +283,7 @@ def main(args: CFG) -> None:
         tokenizer = AutoTokenizer.from_pretrained(args.model_name, additional_special_tokens=new_tokens)
 
         model.resize_token_embeddings(len(tokenizer))
+        model = model.half()
     else:
         tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     tokenizer.pad_token = tokenizer.eos_token
