@@ -84,7 +84,7 @@ data_config:
   overwrite_cache: false
   cache_dir: null
   extension: null
-  preprocessing_num_workers: 48
+  preprocessing_num_workers: 40
   validation_split_percentage: 5
   block_size: null
   map_batch_size: 1
