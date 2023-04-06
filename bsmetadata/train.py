@@ -293,13 +293,13 @@ def main(args: CFG) -> None:
             num_gpus=accelerator.num_processes,
             gpu_id=accelerator.process_index,
         )
-        #todo remove
-        A = iter(train_dataloader)
-        X = next(A)
-        A = next(A)
-        torch.save(X, "/fsx/home-jordiclive/metadata/X.pt")
-        torch.save(A, "/fsx/home-jordiclive/metadata/A.pt")
-        #todo remove
+        # #todo remove
+        # A = iter(train_dataloader)
+        # X = next(A)
+        # A = next(A)
+        # torch.save(X, "/fsx/home-jordiclive/metadata/X.pt")
+        # torch.save(A, "/fsx/home-jordiclive/metadata/A.pt")
+        ## todo remove
         dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
         eval_dataloaders = dict()
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
