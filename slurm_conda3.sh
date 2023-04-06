@@ -37,7 +37,7 @@ num_machines: 1
 num_processes: -1
 mixed_precision: fp16
 " > accelerate_config.yaml
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
   model_name=$MODEL \
   data_config.dataset_name=$DATA_DIR \
   data_config.train_file='*.jsonl.gz' \
