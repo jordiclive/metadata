@@ -277,13 +277,12 @@ def main(args: CFG) -> None:
                 )
             )
         )
-        print(new_tokens)
         new_tokens = [
-            AddedToken(token, lstrip=True) for token in new_tokens
+            AddedToken(token, rstrip=False, lstrip=False, single_word=False, normalized=False) for token in new_tokens
         ]
-        print(new_tokens)
         tokenizer = AutoTokenizer.from_pretrained(args.model_name, additional_special_tokens=new_tokens)
-        print('len_tokenizer',len(tokenizer))
+
+        model.resize_token_embeddings(len(tokenizer))
     else:
         tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     tokenizer.pad_token = tokenizer.eos_token
