@@ -84,7 +84,7 @@ data_config:
   overwrite_cache: false
   cache_dir: null
   extension: null
-  preprocessing_num_workers: 6
+  preprocessing_num_workers: 48
   validation_split_percentage: 5
   block_size: null
   map_batch_size: 1
@@ -112,4 +112,4 @@ do_train: true
 do_eval: true
 gradient_checkpointing: true
 resume_from_checkpoint_dir: null
-gradient_accumulation_steps: 4
+gradient_accumulation_steps: 16

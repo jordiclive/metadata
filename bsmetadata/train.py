@@ -18,7 +18,8 @@ from accelerate import Accelerator
 from accelerate.utils import DistributedType, DummyOptim, DummyScheduler
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
-from torch.optim import AdamW
+# from torch.optim import AdamW
+from transformers import AdamW
 from tqdm.auto import tqdm as original_tqdm
 from transformers import AddedToken, AutoConfig, AutoModelForCausalLM, AutoTokenizer, get_scheduler, set_seed
 from transformers.trainer_utils import IntervalStrategy
@@ -392,7 +393,7 @@ def main(args: CFG) -> None:
     os.environ['WANDB_API_KEY'] = 'd8216641d549f9bb3d0c5074baa39e15dfd55030'
 
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
-    metrics_logger = Logger(is_local_main_process, entity='jordanclive',project='metadata', config=config_dict)
+    metrics_logger = Logger(is_local_main_process, entity='jordanclive',project='metadata1', config=config_dict)
 
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
@@ -476,7 +477,7 @@ def main(args: CFG) -> None:
             step_loss_gathered = accelerator.gather(step_loss).mean().item()
             metrics = {
                 "loss": step_loss_gathered,
-                "lr": max(scheduler.get_lr()),
+                "lr": max(scheduler.get_last_lr()),
                 "gradient_step": train_state.completed_steps,
             }
             if not args.data_config.streaming:
