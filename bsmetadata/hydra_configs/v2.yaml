@@ -73,7 +73,7 @@ data_config:
         entity_paragraph: "<ENTITY_CHAIN>"
     local_metadata_special_token_end:
         entity_paragraph: " </ENTITY_CHAIN> "
-#    local_metadata_special_token_state: True
+    local_metadata_special_token_state: True
   experiment: with_metadata_datasetv2_tf
   per_device_eval_batch_size: 32
   per_device_train_batch_size: 32
