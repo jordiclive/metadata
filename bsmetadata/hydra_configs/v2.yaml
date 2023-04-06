@@ -75,8 +75,8 @@ data_config:
         entity_paragraph: " </ENTITY_CHAIN> "
     local_metadata_special_token_state: True
   experiment: with_metadata_datasetv2_tf
-  per_device_eval_batch_size: 64
-  per_device_train_batch_size: 64
+  per_device_eval_batch_size: 32
+  per_device_train_batch_size: 32
   dataset_name: bs-modeling-metadata/c4-en-html-with-training_metadata_all
   dataset_config_name: null
   train_file: c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz
