@@ -12,7 +12,7 @@ data_files_with_entities = [
     "c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz",
     "c4-en-html_cc-main-2019-18_pq00-002.jsonl.gz",
     "c4-en-html_cc-main-2019-18_pq00-003.jsonl.gz",
-    "c4-en-html_cc-main-2019-18_pq00-004.jsonl.gz",
+    # "c4-en-html_cc-main-2019-18_pq00-004.jsonl.gz",
     "c4-en-html_cc-main-2019-18_pq00-005.jsonl.gz",
     "c4-en-html_cc-main-2019-18_pq00-006.jsonl.gz",
     "c4-en-html_cc-main-2019-18_pq00-007.jsonl.gz",
