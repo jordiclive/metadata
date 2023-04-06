@@ -3,7 +3,8 @@
 #SBATCH --partition="g40"
 #SBATCH --job-name=flan
 #SBATCH --gres=gpu:8
-#SBATCH --ntasks-per-node=12
+#SBATCH --ntasks-per-node=8
+#SBATCH --cpus-per-task=12
 #SBATCH --output=%x_%j.out
 source /fsx/home-jordiclive/miniconda3/bin/activate meta_conda
 cd /fsx/home-jordiclive/metadata
