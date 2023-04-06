@@ -26,7 +26,7 @@ data_config:
     - url
     - datasource
     - length
-#    - entity_paragraph
+    - entity_paragraph
     metadata_column_list:
     - html
     - timestamp
@@ -36,9 +36,9 @@ data_config:
     - generation_datasource
     #- generation_length_sentence
     #- generation_length_text
-#    - entity_paragraph
-    local_metadata_special_tokens: 
-      entity_paragraph: "entity"
+    - entity_paragraph
+#    local_metadata_special_tokens:
+#      entity_paragraph: "entity"
     metadata_sep: ' | '
     metadata_key_value_sep: ': '
     metadata_probability: 0.5
