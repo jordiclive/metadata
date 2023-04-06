@@ -21,6 +21,8 @@ data_config:
     metadata_list:
     - html
     - timestamp
+    - entity_paragraph
+    - title
 #    - website_description
 #    - title
 #    - url
@@ -30,6 +32,8 @@ data_config:
     metadata_column_list:
     - html
     - timestamp
+    - entity_paragraph
+    - title
 #    - website_desc
 #    - title
 #    #- url
