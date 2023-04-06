@@ -69,10 +69,10 @@ data_config:
       - .inf
       tags_to_remove_alone_txt_min_chr_len:
       - 0.0
-    local_metadata_special_token_start:
-        entity_paragraph: "<ENTITY_CHAIN>"
-    local_metadata_special_token_end:
-        entity_paragraph: " </ENTITY_CHAIN> "
+#    local_metadata_special_token_start:
+#        entity_paragraph: "<ENTITY_CHAIN>"
+#    local_metadata_special_token_end:
+#        entity_paragraph: "</ENTITY_CHAIN>"
     local_metadata_special_token_state: true
   experiment: with_metadata_datasetv2_tf
   per_device_eval_batch_size: 2
