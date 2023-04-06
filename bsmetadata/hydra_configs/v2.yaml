@@ -112,4 +112,4 @@ do_train: true
 do_eval: true
 gradient_checkpointing: true
 resume_from_checkpoint_dir: null
-gradient_accumulation_steps: 16
+gradient_accumulation_steps: 1
