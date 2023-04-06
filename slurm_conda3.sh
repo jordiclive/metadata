@@ -40,10 +40,11 @@ mixed_precision: fp16
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file accelerate_config.yaml bsmetadata/train.py --config-name v2 \
   model_name=$MODEL \
   data_config.dataset_name=$DATA_DIR \
+  data_config.train_file='*.jsonl.gz' \
   out_dir=/fsx/home-jordiclive/tmp/metadata-run-html
 
 
-#    data_config.train_file='*.jsonl.gz' \
+
 #    data_config.validation_file='c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz' \
 #    data_config.dataset_name=$DATA_DIR \
 #    data_config.preprocessing_num_workers=6  extra_steps_to_eval_save_at='[2,100,200,400,800]' \
