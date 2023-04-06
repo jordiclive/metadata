@@ -21,25 +21,21 @@ data_config:
     metadata_list:
     - html
     - timestamp
-#    - entity_paragraph
+    - website_description
     - title
-#    - website_description
-#    - title
-#    - url
-#    - datasource
-#    - length
+    - url
+    - datasource
+    - length
 #    - entity_paragraph
     metadata_column_list:
     - html
     - timestamp
-#    - entity_paragraph
+    - website_desc
     - title
-#    - website_desc
-#    - title
-#    #- url
-#    - generation_datasource
-#    #- generation_length_sentence
-#    #- generation_length_text
+    #- url
+    - generation_datasource
+    #- generation_length_sentence
+    #- generation_length_text
 #    - entity_paragraph
     local_metadata_special_tokens: 
       entity_paragraph: "entity"
