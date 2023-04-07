@@ -431,6 +431,10 @@ def main(args: CFG) -> None:
     model.train()
     # for epoch in range(args.num_train_epochs):
     # finished = False
+    logger.info(
+        "Train Loader Length: " + str(len(train_dataloader))
+    )
+    logger.info("Val Loader Length: " + str(len(eval_dataloader)))
     if not args.data_config.streaming:
         metrics_logger.log({"train_dataloader_length": len(train_dataloader)})
 
