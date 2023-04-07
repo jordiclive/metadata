@@ -299,7 +299,12 @@ def main(args: CFG) -> None:
             num_gpus=accelerator.num_processes,
             gpu_id=accelerator.process_index,
         )
-
+        A = iter(train_dataloader)
+        X = next(A)
+        A = next(A)
+        torch.save(X, "/fsx/home-jordiclive/metadata/X.pt")
+        torch.save(A, "/fsx/home-jordiclive/metadata/A.pt")
+        logger.info(f"len(train_dataloader)={len(train_dataloader)}")
         dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
         eval_dataloader , format_fn_eval = get_dataloader(tokenizer=tokenizer,
             args=args.data_config,
@@ -308,6 +313,12 @@ def main(args: CFG) -> None:
             train = False
 
         )
+        A = iter(train_dataloader)
+        X = next(A)
+        A = next(A)
+        torch.save(X, "/fsx/home-jordiclive/metadata/eval.pt")
+        torch.save(A, "/fsx/home-jordiclive/metadata/eval_A.pt")
+        logger.info(f"len(eval_dataloader)={len(eval_dataloader)}")
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
@@ -395,7 +406,7 @@ def main(args: CFG) -> None:
 
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
     t_bs = args.data_config.per_device_train_batch_size*args.gradient_accumulation_steps*8
-    metrics_logger = Logger(is_local_main_process, name=f"40gb-{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
+    metrics_logger = Logger(is_local_main_process, name=f"40gb-{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata1', config=config_dict)
 
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
@@ -431,10 +442,7 @@ def main(args: CFG) -> None:
     model.train()
     # for epoch in range(args.num_train_epochs):
     # finished = False
-    logger.info(
-        "Train Loader Length: " + str(len(train_dataloader))
-    )
-    logger.info("Val Loader Length: " + str(len(eval_dataloader)))
+
     if not args.data_config.streaming:
         metrics_logger.log({"train_dataloader_length": len(train_dataloader)})
 
@@ -453,6 +461,7 @@ def main(args: CFG) -> None:
                 if args.data_config.experiment == "with_metadata_datasetv2_tf":
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
+
     eval_iter = get_eval_data_iter()
     eval_dataloaders = {'validation': eval_iter}
 
