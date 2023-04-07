@@ -372,7 +372,8 @@ def main(args: CFG) -> None:
             loss = loss_fn(batch, outputs, metadata_mask)
 
             losses.append(accelerator.gather(loss.repeat(args.data_config.per_device_eval_batch_size)))
-
+            if step == 10:
+                break
         model.train()
         if not losses:
             # in case the dataloader is empty
