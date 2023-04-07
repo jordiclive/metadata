@@ -301,14 +301,13 @@ def main(args: CFG) -> None:
         )
 
         dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
-        eval_dataloader = get_dataloader(tokenizer=tokenizer,
+        eval_dataloader , format_fn_eval = get_dataloader(tokenizer=tokenizer,
             args=args.data_config,
             num_gpus=accelerator.num_processes,
             gpu_id=accelerator.process_index,
             train = False
 
         )
-        eval_dataloaders = {0: eval_dataloader}
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
@@ -441,6 +440,16 @@ def main(args: CFG) -> None:
                 if args.data_config.experiment == "with_metadata_datasetv2_tf":
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
+
+    def get_eval_data_iter():
+        while True:
+            for batch in eval_dataloader:
+                batch = format_fn_eval(batch)
+                if args.data_config.experiment == "with_metadata_datasetv2_tf":
+                    batch = {k: v.to(accelerator.device) for k, v in batch.items()}
+                yield batch
+    eval_iter = get_eval_data_iter()
+    eval_dataloaders = {0: eval_iter}
 
     data_iter = get_data_iter()
 
