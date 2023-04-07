@@ -450,7 +450,7 @@ def main(args: CFG) -> None:
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
     eval_iter = get_eval_data_iter()
-    eval_dataloaders = {0: eval_iter}
+    eval_dataloaders = {'validation': eval_iter}
 
     data_iter = get_data_iter()
 
