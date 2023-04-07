@@ -100,9 +100,9 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
     print(f"{len(files_with_entities)} files with entities")
     print(f"{len(files_without_entities)} ")
     if train:
-        files_with_entities = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' not in x]
+        files_with_entities = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' not in x.name]
     else:
-        files_with_entities = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x]
+        files_with_entities = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
     # files_without_entities = [files_with_entities[-1]]
     # files_with_entities = files_with_entities[:-1]
     # print(f"{len(files_with_entities)} files with entities")
