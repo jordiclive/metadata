@@ -299,15 +299,16 @@ def main(args: CFG) -> None:
             num_gpus=accelerator.num_processes,
             gpu_id=accelerator.process_index,
         )
-        # #todo remove
-        # A = iter(train_dataloader)
-        # X = next(A)
-        # A = next(A)
-        # torch.save(X, "/fsx/home-jordiclive/metadata/X.pt")
-        # torch.save(A, "/fsx/home-jordiclive/metadata/A.pt")
-        ## todo remove
+
         dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
-        eval_dataloaders = dict()
+        eval_dataloader = get_dataloader(tokenizer=tokenizer,
+            args=args.data_config,
+            num_gpus=accelerator.num_processes,
+            gpu_id=accelerator.process_index,
+            train = False
+
+        )
+        eval_dataloaders = {0,eval_dataloader}
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
@@ -394,7 +395,7 @@ def main(args: CFG) -> None:
 
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
     t_bs = args.data_config.per_device_train_batch_size*args.gradient_accumulation_steps*8
-    metrics_logger = Logger(is_local_main_process, name=f"{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
+    metrics_logger = Logger(is_local_main_process, name=f"80gb-{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
 
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
