@@ -308,7 +308,7 @@ def main(args: CFG) -> None:
             train = False
 
         )
-        eval_dataloaders = {0,eval_dataloader}
+        eval_dataloaders = {0: eval_dataloader}
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
