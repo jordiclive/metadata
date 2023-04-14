@@ -149,9 +149,9 @@ def build_dataset(tokenizer, args):
     print(f"{len(files_with_entities)} files with entities")
     print(f"{len(files_without_entities)} ")
 
-    train_files = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' not in x.name]
+    train_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' not in x.name]
 
-    val_files = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
+    val_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
 
     datasets = load_dataset(path=local_dir,data_files=train_files)
     val = load_dataset(path=local_dir,data_files=val_files)
