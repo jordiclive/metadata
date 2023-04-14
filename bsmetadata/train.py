@@ -324,7 +324,7 @@ def main(args: CFG) -> None:
         model, optimizer, train_dataloader, scheduler = accelerator.prepare(
             model, optimizer, train_dataloader, scheduler
         )
-        eval_dataloaders = {k: accelerator.prepare(v) for k, v in eval_dataloaders.items()}
+        # eval_dataloaders = {k: accelerator.prepare(v) for k, v in eval_dataloaders.items()}
     train_state = TrainState()
 
     # If resume_from_checkpoint_dir is not None, we load the resumed state
