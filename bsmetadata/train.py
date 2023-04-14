@@ -290,6 +290,8 @@ def main(args: CFG) -> None:
     # get dataloaders
 
     tokenizer.pad_token = tokenizer.eos_token
+
+
     if args.data_config.experiment == "with_metadata_datasetv2_tf":
         from bsmetadata.experiments.with_metadata_datasetv2_tf import get_dataloader, get_dummy_dataloader
 
@@ -312,7 +314,7 @@ def main(args: CFG) -> None:
             model, optimizer, dummy_dataloader, scheduler
         )
     else:
-
+        print('WITHOUT metadata')
         def format_fn(x):
             return x
 

@@ -74,7 +74,7 @@ data_config:
     local_metadata_special_token_end:
         entity_paragraph: " </ENTITY_CHAIN> "
     local_metadata_special_token_state: True
-  experiment: with_metadata_datasetv2_tf
+  experiment: without_metadata
   per_device_eval_batch_size: 64
   per_device_train_batch_size: 64
   dataset_name: bs-modeling-metadata/c4-en-html-with-training_metadata_all
