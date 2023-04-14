@@ -367,7 +367,7 @@ def main(args: CFG) -> None:
         model.eval()
         losses = []
         for step, batch in enumerate(tqdm(eval_dataloader, desc="eval")):  # , leave=False)
-            labels = batch.pop("labels")
+            labels = batch["input_ids"].copy()
             metadata_mask = batch.pop("metadata_mask", None)
             outputs = model(**batch)
             batch["labels"] = labels
@@ -466,7 +466,7 @@ def main(args: CFG) -> None:
     for batch in data_iter:
         step += 1
         # pop labels because we want to calculate loss ourselves
-        labels = batch.pop("labels")
+        labels = batch["input_ids"].copy()
         metadata_mask = batch.pop("metadata_mask", None)
         outputs = model(**batch)
         batch["labels"] = labels

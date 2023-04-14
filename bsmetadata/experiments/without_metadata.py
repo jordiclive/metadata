@@ -200,5 +200,5 @@ def get_dataloaders(tokenizer, args):
         collate_fn=default_data_collator,
         batch_size=args.per_device_eval_batch_size,
     )
-    return train_dataloader, {"val1": val_dataloader1}
+    return train_dataloader, val_dataloader1
 
