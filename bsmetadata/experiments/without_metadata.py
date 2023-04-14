@@ -1,5 +1,6 @@
 import functools
 import logging
+from pathlib import Path
 
 from datasets import config, load_dataset
 from torch.utils.data import DataLoader
@@ -56,6 +57,7 @@ def preprocess_no_metadata(dataset, tokenizer, args):
         batch_size=args.map_batch_size,
     )
     return result
+from bsmetadata.experiments.datasetv2 import data_files_with_entities
 
 
 def build_dataset(tokenizer, args):
@@ -76,70 +78,84 @@ def build_dataset(tokenizer, args):
     #
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
-    data_files = {}
-    if args.train_file is not None:
-        data_files["train"] = args.train_file
-    if args.validation_file is not None:
-        data_files["validation"] = args.validation_file
+    # data_files = {}
+    # if args.train_file is not None:
+    #     data_files["train"] = args.train_file
+    # if args.validation_file is not None:
+    #     data_files["validation"] = args.validation_file
+    #
+    # if not data_files:
+    #     data_files = None
+    #
+    # logger.info(f"Start to load dataset, the result will be cached at {config.HF_DATASETS_CACHE}")
+    # if args.dataset_name is not None:
+    #     logger.info(
+    #         "Downloading with arguments: "
+    #         f"dataset_name={args.dataset_name}, "
+    #         f"dataset_config_name={args.dataset_config_name}, "
+    #         f"data_files={data_files}, "
+    #         f"cache_dir={args.cache_dir},"
+    #     )
+    #     # Downloading and loading a dataset from the hub.
+    #     datasets = load_dataset(
+    #         args.dataset_name,
+    #         args.dataset_config_name,
+    #         cache_dir=args.cache_dir,
+    #         keep_in_memory=False,
+    #     )
+    #
+    #     if "validation" not in datasets.keys():
+    #         datasets["validation"] = load_dataset(
+    #             args.dataset_name,
+    #             args.dataset_config_name,
+    #             split=f"train[:{args.validation_split_percentage}%]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    #         datasets["train"] = load_dataset(
+    #             args.dataset_name,
+    #             args.dataset_config_name,
+    #             split=f"train[{args.validation_split_percentage}%:]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    # else:
+    #     logger.info("Loading dataset from extension script")
+    #     extension = args.train_file.split(".")[-1] if not args.extension else args.extension
+    #     if extension == "txt":
+    #         extension = "text"
+    #     if extension == "jsonl":
+    #         extension = "json"
+    #     datasets = load_dataset(extension, data_files=data_files, cache_dir=args.cache_dir)
+    #
+    #     if "validation" not in datasets.keys():
+    #         datasets["validation"] = load_dataset(
+    #             extension,
+    #             data_files=data_files,
+    #             split=f"train[:{args.validation_split_percentage}%]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    #         datasets["train"] = load_dataset(
+    #             extension,
+    #             data_files=data_files,
+    #             split=f"train[{args.validation_split_percentage}%:]",
+    #             cache_dir=args.cache_dir,
+    #         )
+    # # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
+    # # https://huggingface.co/docs/datasets/loading_datasets.html.
+    local_dir = "/fsx/home-jordiclive/metadata/local-data/datasets--bs-modeling-metadata--c4-en-html-with-training_metadata_all/snapshots/8f2615d8b8580e89533b90bc3931e0b99ef15aec"
+    file_paths = list(Path(local_dir).glob("*.jsonl.gz"))
 
-    if not data_files:
-        data_files = None
+    files_with_entities = [x for x in file_paths if x.name in data_files_with_entities]
+    files_without_entities = [x for x in file_paths if x.name not in data_files_with_entities]
+    print(f"{len(files_with_entities)} files with entities")
+    print(f"{len(files_without_entities)} ")
 
-    logger.info(f"Start to load dataset, the result will be cached at {config.HF_DATASETS_CACHE}")
-    if args.dataset_name is not None:
-        logger.info(
-            "Downloading with arguments: "
-            f"dataset_name={args.dataset_name}, "
-            f"dataset_config_name={args.dataset_config_name}, "
-            f"data_files={data_files}, "
-            f"cache_dir={args.cache_dir},"
-        )
-        # Downloading and loading a dataset from the hub.
-        datasets = load_dataset(
-            args.dataset_name,
-            args.dataset_config_name,
-            cache_dir=args.cache_dir,
-            keep_in_memory=False,
-        )
+    train_files = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' not in x.name]
 
-        if "validation" not in datasets.keys():
-            datasets["validation"] = load_dataset(
-                args.dataset_name,
-                args.dataset_config_name,
-                split=f"train[:{args.validation_split_percentage}%]",
-                cache_dir=args.cache_dir,
-            )
-            datasets["train"] = load_dataset(
-                args.dataset_name,
-                args.dataset_config_name,
-                split=f"train[{args.validation_split_percentage}%:]",
-                cache_dir=args.cache_dir,
-            )
-    else:
-        logger.info("Loading dataset from extension script")
-        extension = args.train_file.split(".")[-1] if not args.extension else args.extension
-        if extension == "txt":
-            extension = "text"
-        if extension == "jsonl":
-            extension = "json"
-        datasets = load_dataset(extension, data_files=data_files, cache_dir=args.cache_dir)
+    val_files = [x for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
 
-        if "validation" not in datasets.keys():
-            datasets["validation"] = load_dataset(
-                extension,
-                data_files=data_files,
-                split=f"train[:{args.validation_split_percentage}%]",
-                cache_dir=args.cache_dir,
-            )
-            datasets["train"] = load_dataset(
-                extension,
-                data_files=data_files,
-                split=f"train[{args.validation_split_percentage}%:]",
-                cache_dir=args.cache_dir,
-            )
-    # See more about loading any type of standard or custom dataset (from files, python dict, pandas DataFrame, etc) at
-    # https://huggingface.co/docs/datasets/loading_datasets.html.
-
+    datasets = load_dataset(path=local_dir,data_files=train_files)
+    val = load_dataset(path=local_dir,data_files=val_files)
+    datasets['validation'] = val['train']
     datasets = preprocess_no_metadata(datasets, tokenizer, args)
     logger.info("Group texts finished")
     return datasets
@@ -185,3 +201,4 @@ def get_dataloaders(tokenizer, args):
         batch_size=args.per_device_eval_batch_size,
     )
     return train_dataloader, {"val1": val_dataloader1}
+
