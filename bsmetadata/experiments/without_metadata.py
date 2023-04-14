@@ -28,37 +28,37 @@ def preprocess_no_metadata(dataset, tokenizer, args):
 
     block_size = args.metadata_config.max_seq_len
 
-    # def group_texts(examples, block_size):
-    #     # Concatenate all texts.
-    #     concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
-    #     total_length = len(concatenated_examples[list(examples.keys())[0]])
-    #     # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
-    #     # customize this part to your needs.
-    #     if total_length >= block_size:
-    #         total_length = (total_length // block_size) * block_size
-    #         # Split by chunks of max_len.
-    #         result = {
-    #             k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
-    #             for k, t in concatenated_examples.items()
-    #         }
-    #     else:
-    #         padding_len = block_size - total_length
-    #         result = {
-    #             "input_ids": [concatenated_examples["input_ids"] + [tokenizer.eos_token_id] * padding_len],
-    #             "attention_mask": [concatenated_examples["attention_mask"] + [0] * padding_len],
-    #         }
-    #     return result
+    def group_texts(examples, block_size):
+        # Concatenate all texts.
+        concatenated_examples = {k: sum(examples[k], []) for k in examples.keys()}
+        total_length = len(concatenated_examples[list(examples.keys())[0]])
+        # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
+        # customize this part to your needs.
+        if total_length >= block_size:
+            total_length = (total_length // block_size) * block_size
+            # Split by chunks of max_len.
+            result = {
+                k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
+                for k, t in concatenated_examples.items()
+            }
+        else:
+            padding_len = block_size - total_length
+            result = {
+                "input_ids": [concatenated_examples["input_ids"] + [tokenizer.eos_token_id] * padding_len],
+                "attention_mask": [concatenated_examples["attention_mask"] + [0] * padding_len],
+            }
+        return result
 
-    # result = tokenized_dataset.map(
-    #     functools.partial(group_texts, block_size=block_size),
-    #     batched=True,
-    #     num_proc=args.preprocessing_num_workers,
-    #     load_from_cache_file=not args.overwrite_cache,
-    #     desc=f"Grouping texts in chunks of {block_size}",
-    #     batch_size=args.map_batch_size,
-    # )
-    # return result
-    return tokenized_dataset
+    result = tokenized_dataset.map(
+        functools.partial(group_texts, block_size=block_size),
+        batched=True,
+        num_proc=args.preprocessing_num_workers,
+        load_from_cache_file=not args.overwrite_cache,
+        desc=f"Grouping texts in chunks of {block_size}",
+        batch_size=args.map_batch_size,
+    )
+    return result
+    # return tokenized_dataset
 
 
 def build_dataset(tokenizer, args):
@@ -151,7 +151,7 @@ def build_dataset(tokenizer, args):
     print(f"{len(files_without_entities)} ")
 
     train_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' not in x.name]
-    train_files = train_files[10:12]
+    train_files = train_files[150:]
     val_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
     # train_files = train_files[:2]
     datasets = load_dataset(path=local_dir,data_files=train_files)
