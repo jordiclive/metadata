@@ -155,7 +155,7 @@ def build_dataset(tokenizer, args):
 
     val_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
     # train_files = train_files[:2]
-    train_files = train_files[:150]
+    # train_files = train_files[:150]
     errors = ['c4-en-html_cc-main-2019-18_pq00-177.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-214.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq01-000.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-117.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-137.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-120.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-131.jsonl.gz', '.gitattributes', 'c4-en-html_cc-main-2019-18_pq00-159.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-157.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-231.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-123.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-017.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-028.jsonl.gz', 'c4-en-html_cc-main-2019-18_pq00-234.jsonl.gz']
     a = []
     for k in train_files:
