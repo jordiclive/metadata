@@ -76,6 +76,9 @@ x = time.time()
 datasets = load_dataset(
     path='/fsx/home-jordiclive/metadata/local-data/datasets--bs-modeling-metadata--c4-en-html-with-training_metadata_all/snapshots/8f2615d8b8580e89533b90bc3931e0b99ef15aec',
     data_files=train_files)
+
+val = load_dataset(path=local_dir,data_files=val_files)
+datasets['validation'] = val['train']
 log_print('Time to load dataset: {}'.format(time.time() - x))
 datasets.save_to_disk('/admin/home-jordiclive/whole_dataset')
 # for k in train_files:
