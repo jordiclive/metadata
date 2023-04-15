@@ -157,7 +157,7 @@ def build_dataset(tokenizer, args):
     # train_files = train_files[:2]
     train_files = train_files[:150]
     problematic_files = ['c4-en-html_cc-main-2019-18_pq00-137.jsonl.gz']
-    train_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-137.jsonl.gz' not in x.name]
+    train_files = [x for x in train_files if 'c4-en-html_cc-main-2019-18_pq00-137.jsonl.gz' not in x]
 
     # for k in train_files[10:]:
     #     try:
