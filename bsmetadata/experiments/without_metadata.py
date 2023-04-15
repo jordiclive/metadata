@@ -2,7 +2,7 @@ import functools
 import logging
 from pathlib import Path
 
-from datasets import config, load_dataset
+from datasets import config, load_dataset, load_from_disk
 from torch.utils.data import DataLoader
 from transformers import default_data_collator
 from bsmetadata.experiments.datasetv2 import data_files_with_entities
@@ -203,7 +203,7 @@ def get_dataloaders(tokenizer, args):
            outputs = model(**batch)
            metrics = loss_fn(batch, outputs, metadata_mask)
     """
-    datasets = build_dataset(tokenizer, args)
+    datasets = load_from_disk('admin/home-jordiclive/whole_processed_dataset')
 
     train_dataset = datasets["train"]
     val_dataset = datasets["validation"]
