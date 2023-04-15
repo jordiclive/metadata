@@ -203,7 +203,7 @@ def get_dataloaders(tokenizer, args):
            outputs = model(**batch)
            metrics = loss_fn(batch, outputs, metadata_mask)
     """
-    datasets = load_from_disk('admin/home-jordiclive/whole_processed_dataset')
+    datasets = load_from_disk('/admin/home-jordiclive/whole_processed_dataset')
 
     train_dataset = datasets["train"]
     val_dataset = datasets["validation"]
