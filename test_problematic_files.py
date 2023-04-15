@@ -12,8 +12,8 @@ logging.basicConfig(
     level=logging.FATAL,
 )
 import os
-os['TRANSFORMERS_CACHE'] = '/admin/home-jordiclive/transformers_cache'
-os['HF_DATASETS_CACHE'] = '/fsx/home-jordiclive/hf_datasets_cache'
+os.environ['TRANSFORMERS_CACHE'] = '/admin/home-jordiclive/transformers_cache'
+os.environ['HF_DATASETS_CACHE'] = '/fsx/home-jordiclive/hf_datasets_cache'
 def list_files(directory_path):
     file_list = []
     for entry in os.scandir(directory_path):
