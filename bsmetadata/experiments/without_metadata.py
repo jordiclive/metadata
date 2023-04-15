@@ -155,12 +155,16 @@ def build_dataset(tokenizer, args):
 
     val_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz' in x.name]
     # train_files = train_files[:2]
-    for k in train_files[10:]:
-        try:
-            datasets = load_dataset(path=local_dir, data_files=[k])
-        except:
-            print(f"ERROR with {k}")
-    raise ValueError("stop")
+
+    problematic_files = ['c4-en-html_cc-main-2019-18_pq00-137.jsonl.gz']
+    train_files = [x.name for x in files_with_entities if 'c4-en-html_cc-main-2019-18_pq00-137.jsonl.gz' not in x.name]
+
+    # for k in train_files[10:]:
+    #     try:
+    #         datasets = load_dataset(path=local_dir, data_files=[k])
+    #     except:
+    #         print(f"ERROR with {k}")
+    # raise ValueError("stop")
     datasets = load_dataset(path=local_dir,data_files=train_files)
 
 
