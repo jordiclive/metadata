@@ -447,7 +447,7 @@ def main(args: CFG) -> None:
     def get_eval_data_iter():
         while True:
             for batch in eval_dataloader:
-                batch = format_fn_eval(batch)
+                batch = format_fn(batch)
                 if args.data_config.experiment == "with_metadata_datasetv2_tf":
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
