@@ -73,6 +73,8 @@ print(len(train_files))
 print(train_files)
 import time
 x = time.time()
+#todo remove
+train_files = train_files[:2]
 datasets = load_dataset(
     path='/fsx/home-jordiclive/metadata/local-data/datasets--bs-modeling-metadata--c4-en-html-with-training_metadata_all/snapshots/8f2615d8b8580e89533b90bc3931e0b99ef15aec',
     data_files=train_files)
