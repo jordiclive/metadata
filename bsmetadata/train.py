@@ -318,7 +318,7 @@ def main(args: CFG) -> None:
         def format_fn(x):
             return x
 
-        train_dataloader, eval_dataloaders = get_dataloaders(tokenizer, args.data_config)
+        train_dataloader, eval_dataloader = get_dataloaders(tokenizer, args.data_config)
 
         # Prepare everything
         model, optimizer, train_dataloader, scheduler = accelerator.prepare(
