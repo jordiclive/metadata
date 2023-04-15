@@ -451,7 +451,17 @@ def main(args: CFG) -> None:
                 yield batch
     eval_iter = get_eval_data_iter()
     eval_dataloaders = {'validation': eval_iter}
-
+    X = iter(train_dataloader)
+    Z = next(X)
+    Y = next(X)
+    V = iter(eval_iter)
+    W = next(V)
+    G = next(V)
+    torch.save(Z, "Z.pt")
+    torch.save(Y, "Y.pt")
+    torch.save(W, "W.pt")
+    torch.save(G, "G.pt")
+    
     data_iter = get_data_iter()
 
     for _ in tqdm(
