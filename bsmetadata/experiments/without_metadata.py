@@ -167,7 +167,7 @@ def build_dataset(tokenizer, args):
 
     train_files = [x for x in train_files if x not in a]
 
-
+    print(len(train_files))
     # for k in train_files[10:]:
     #     try:
     #         datasets = load_dataset(path=local_dir, data_files=[k])
