@@ -4,11 +4,13 @@
 #SBATCH --job-name=flan
 #SBATCH --gres=gpu:8
 #SBATCH --ntasks-per-node=8
-#SBATCH --cpus-per-task=12
+#SBATCH --ntasks-per-node=8
 #SBATCH --output=%x_%j.out
+#SBATCH --exclusive
+
 source /admin/home-jordiclive/miniconda3/bin/activate meta_conda
 cd /fsx/home-jordiclive/metadata
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
 export TRANSFORMERS_CACHE=/admin/home-jordiclive/transformers_cache
 
 export HF_DATASETS_OFFLINE=1
