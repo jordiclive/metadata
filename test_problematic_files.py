@@ -70,6 +70,7 @@ a = list(set(a))
 train_files = [x for x in train_files if x not in a]
 
 print(len(train_files))
+print(train_files)
 import time
 x = time.time()
 datasets = load_dataset(
