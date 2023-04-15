@@ -11,10 +11,12 @@
 source /admin/home-jordiclive/miniconda3/bin/activate meta_conda
 cd /fsx/home-jordiclive/metadata
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/:$CUDNN_PATH/lib
 export TRANSFORMERS_CACHE=/admin/home-jordiclive/transformers_cache
 
 export HF_DATASETS_OFFLINE=1
-export TRANSFORMERS_OFFLINE=1
+#export TRANSFORMERS_OFFLINE=1
 # be careful about the cache folder for Wandb
 #export WANDB_MODE=offline
 export HYDRA_FULL_ERROR=1
