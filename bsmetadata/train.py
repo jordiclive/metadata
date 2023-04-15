@@ -454,7 +454,13 @@ def main(args: CFG) -> None:
 
 
     data_iter = get_data_iter()
-
+    print('SAVINGGGGGGGGGG!')
+    for batch in data_iter:
+        torch.save(batch, "/fsx/home-jordiclive/metadata/Y_eval.pt")
+        break
+    for batch in eval_iter:
+        torch.save(batch, "/fsx/home-jordiclive/metadata/X_eval.pt")
+        break
     X = iter(data_iter)
     Z = next(X)
     Y = next(X)
