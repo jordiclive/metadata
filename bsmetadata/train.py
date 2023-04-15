@@ -451,18 +451,20 @@ def main(args: CFG) -> None:
                 yield batch
     eval_iter = get_eval_data_iter()
     eval_dataloaders = {'validation': eval_iter}
-    X = iter(train_dataloader)
+
+
+    data_iter = get_data_iter()
+
+    X = iter(data_iter)
     Z = next(X)
     Y = next(X)
     V = iter(eval_iter)
     W = next(V)
     G = next(V)
-    torch.save(Z, "Z.pt")
-    torch.save(Y, "Y.pt")
-    torch.save(W, "W.pt")
-    torch.save(G, "G.pt")
-    
-    data_iter = get_data_iter()
+    torch.save(Z, "/fsx/home-jordiclive/metadata/Z.pt")
+    torch.save(Y, "/fsx/home-jordiclive/metadata/Y.pt")
+    torch.save(W, "/fsx/home-jordiclive/metadata/W.pt")
+    torch.save(G, "/fsx/home-jordiclive/metadata/G.pt")
 
     for _ in tqdm(
         range(args.gradient_accumulation_steps * train_state.completed_steps), desc="skipping data after resume"
