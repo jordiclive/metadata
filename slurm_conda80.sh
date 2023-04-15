@@ -53,5 +53,3 @@ CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --
 #    data_config.preprocessing_num_workers=6  extra_steps_to_eval_save_at='[2,100,200,400,800]' \
 #    data_config.metadata_config.metadata_list='[html]' \
 #    data_config.metadata_config.metadata_column_list='[html]' \
-
-
