@@ -41,7 +41,7 @@ data_config:
       entity_paragraph: "entity"
     metadata_sep: ' | '
     metadata_key_value_sep: ': '
-    metadata_probability: 0.5
+    metadata_probability: 0
     treat_local_metadata_as_regular_text: true
     add_local_metadata_special_tokens_in_prefix: true
     metadata_prefix_sep: ' |||'
@@ -104,7 +104,7 @@ start_with_eval: false
 #- 2
 evaluation_strategy: STEPS
 eval_num_per_epoch: 3
-eval_steps: 250
+eval_steps: 10
 save_strategy: STEPS
 save_num_per_epoch: 3
 save_steps: 250
