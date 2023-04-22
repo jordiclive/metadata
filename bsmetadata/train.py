@@ -217,8 +217,8 @@ def main(args: CFG) -> None:
     is_local_main_process = accelerator.is_local_main_process
     tqdm = partial(original_tqdm, disable=not is_local_main_process, position=0)
     use_deepspeed = accelerator.state.deepspeed_plugin is not None
-    use_deepspeed_optimzer = use_deepspeed and "optimizer" in accelerator.state.deepspeed_plugin.deepspeed_config
-    use_deepspeed_scheduler = use_deepspeed and "scheduler" in accelerator.state.deepspeed_plugin.deepspeed_config
+    use_deepspeed_optimzer = use_deepspeed or "optimizer" in accelerator.state.deepspeed_plugin.deepspeed_config
+    use_deepspeed_scheduler = use_deepspeed or "scheduler" in accelerator.state.deepspeed_plugin.deepspeed_config
 
     if accelerator.distributed_type == DistributedType.DEEPSPEED and not use_deepspeed_scheduler:
         assert False, "Please set scheduler in DeepSpeed config file otherwise it may not be checkpointed properly"
@@ -293,13 +293,14 @@ def main(args: CFG) -> None:
             num_gpus=accelerator.num_processes,
             gpu_id=accelerator.process_index,
         )
+        dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
         eval_dataloader, format_fn_eval = get_dataloader(tokenizer=tokenizer,
                                                          args=args.data_config,
                                                          num_gpus=accelerator.num_processes,
                                                          gpu_id=accelerator.process_index,
                                                          train=False
-
                                                          )
+
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
@@ -429,6 +430,14 @@ def main(args: CFG) -> None:
         while True:
             for batch in train_dataloader:
                 batch = format_fn(batch)
+                if args.data_config.experiment == "with_metadata_datasetv2_tf":
+                    batch = {k: v.to(accelerator.device) for k, v in batch.items()}
+                yield batch
+
+    def get_eval_data_iter():
+        while True:
+            for batch in eval_dataloader:
+                batch = format_fn_eval(batch)
                 if args.data_config.experiment == "with_metadata_datasetv2_tf":
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
