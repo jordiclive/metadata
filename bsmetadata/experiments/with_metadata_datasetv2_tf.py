@@ -111,7 +111,7 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
     data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
 
 
-    
+
     data = tf.data.Dataset.sample_from_datasets(
         [data_with_entities],
         weights=[float(len(files_with_entities))],

@@ -92,12 +92,12 @@ def add_metadata_and_chunk_examples(
         else:
             metadata_prefix_encoded = []
 
-        # if add_metadata:
-        #     # Get the actual text with local metadata inserted.
-        #     text_with_local_metadata, char_level_metadata_mask = add_local_metadata_to_text(example, cfg)
-        # else:
-        text_with_local_metadata = example["text"]
-        char_level_metadata_mask = [False] * len(text_with_local_metadata)
+        if add_metadata:
+            # Get the actual text with local metadata inserted.
+            text_with_local_metadata, char_level_metadata_mask = add_local_metadata_to_text(example, cfg)
+        else:
+            text_with_local_metadata = example["text"]
+            char_level_metadata_mask = [False] * len(text_with_local_metadata)
 
         if metadata_prefix_encoded:
             text_with_local_metadata = " " + text_with_local_metadata
@@ -248,14 +248,14 @@ def create_metadata_prefix(example: Dict[str, Any], cfg: MetadataConfig) -> str:
         if type_ == "global":
             processor = PROCESSORS.get(key, MetadataProcessor)(cfg)
             processed_metadata[key] = processor.process_global(metadata)
-        # elif (
-        #     cfg.add_local_metadata_special_tokens_in_prefix
-        #     and cfg.local_metadata_special_tokens
-        #     and key in cfg.local_metadata_special_tokens
-        # ):
-        #     processed_metadata[key] = cfg.local_metadata_special_tokens[key]
-        # elif cfg.add_local_metadata_special_tokens_in_prefix:
-        #     processed_metadata[key] = key
+        elif (
+            cfg.add_local_metadata_special_tokens_in_prefix
+            and cfg.local_metadata_special_tokens
+            and key in cfg.local_metadata_special_tokens
+        ):
+            processed_metadata[key] = cfg.local_metadata_special_tokens[key]
+        elif cfg.add_local_metadata_special_tokens_in_prefix:
+            processed_metadata[key] = key
 
     sorted_metadata = [processed_metadata.get(md, None) for md in cfg.metadata_list]
     sorted_metadata = [md for md in sorted_metadata if md is not None]
