@@ -431,6 +431,8 @@ def main(args: CFG) -> None:
     step_loss = 0
     step = 0
     model.train()
+
+    print('LEN_TRAINDATALOADER',len(train_dataloader))
     # for epoch in range(args.num_train_epochs):
     # finished = False
     if not args.data_config.streaming:

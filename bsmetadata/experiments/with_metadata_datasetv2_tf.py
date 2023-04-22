@@ -118,14 +118,15 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
     # )
     #todo modified
     data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
-    print(len(list(data_with_entities)),'PRE')
+
+
     # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
-    data = tf.data.Dataset.sample_from_datasets(
-        [data_with_entities],
-        weights=[float(len(files_with_entities))],
-        seed=42,
-    )
-    print(len(list(data)),'POST')
+    # data = tf.data.Dataset.sample_from_datasets(
+    #     [data_with_entities],
+    #     weights=[float(len(files_with_entities))],
+    #     seed=42,
+    # )
+    data = data_with_entities
 
     data = data.shuffle(1000, reshuffle_each_iteration=True)
     data = data.batch(data_config.per_device_train_batch_size)
@@ -140,6 +141,15 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
         }
         batch = {k: torch.tensor(v.numpy(), dtype=int) for k, v in batch.items()}
         return batch
+
+    def get_data_iter(train_dataloader):
+        while True:
+            for batch in train_dataloader:
+                batch = to_dict(batch)
+                yield batch
+
+    data = get_data_iter(data)
+    len('LEN DATA',data)
 
     return data, to_dict
 
