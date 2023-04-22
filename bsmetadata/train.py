@@ -18,7 +18,7 @@ from accelerate import Accelerator
 from accelerate.utils import DistributedType, DummyOptim, DummyScheduler
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
-from torch.optim import AdamW
+from transformers import AdamW
 from tqdm.auto import tqdm as original_tqdm
 from transformers import AddedToken, AutoConfig, AutoModelForCausalLM, AutoTokenizer, get_scheduler, set_seed
 from transformers.trainer_utils import IntervalStrategy
@@ -293,8 +293,13 @@ def main(args: CFG) -> None:
             num_gpus=accelerator.num_processes,
             gpu_id=accelerator.process_index,
         )
-        dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
-        eval_dataloaders = dict()
+        eval_dataloader, format_fn_eval = get_dataloader(tokenizer=tokenizer,
+                                                         args=args.data_config,
+                                                         num_gpus=accelerator.num_processes,
+                                                         gpu_id=accelerator.process_index,
+                                                         train=False
+
+                                                         )
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
@@ -359,7 +364,8 @@ def main(args: CFG) -> None:
             loss = loss_fn(batch, outputs, metadata_mask)
 
             losses.append(accelerator.gather(loss.repeat(args.data_config.per_device_eval_batch_size)))
-
+            if step == 120:
+                break
         model.train()
         if not losses:
             # in case the dataloader is empty
@@ -379,8 +385,9 @@ def main(args: CFG) -> None:
         return
 
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
-    metrics_logger = Logger(is_local_main_process, project=args.project_name, config=config_dict)
-
+    # metrics_logger = Logger(is_local_main_process, project=args.project_name, config=config_dict)
+    t_bs = args.data_config.per_device_train_batch_size*args.gradient_accumulation_steps*8
+    metrics_logger = Logger(is_local_main_process, name=f"80gb-metadata_prob=0,{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
         logger.info("Start with an evaluation")
@@ -426,6 +433,9 @@ def main(args: CFG) -> None:
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
 
+    eval_iter = get_eval_data_iter()
+    eval_dataloaders = {'validation': eval_iter}
+
     data_iter = get_data_iter()
 
     for _ in tqdm(
@@ -461,11 +471,18 @@ def main(args: CFG) -> None:
                 optimizer.zero_grad()
 
             step_loss_gathered = accelerator.gather(step_loss).mean().item()
-            metrics = {
-                "loss": step_loss_gathered,
-                "lr": max(scheduler.get_lr()),
-                "gradient_step": train_state.completed_steps,
-            }
+            if step < 20:
+                metrics = {
+                    "loss": step_loss_gathered,
+                    "lr": 0,
+                    "gradient_step": train_state.completed_steps,
+                }
+            else:
+                metrics = {
+                    "loss": step_loss_gathered,
+                    "lr": max(scheduler.get_last_lr()),
+                    "gradient_step": train_state.completed_steps,
+                }
             if not args.data_config.streaming:
                 metrics["epoch"] = step / len(train_dataloader)
 
