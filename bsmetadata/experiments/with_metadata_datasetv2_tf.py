@@ -118,12 +118,14 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
     # )
     #todo modified
     data_with_entities = get_dataset(files_with_entities, num_gpus, gpu_id, data_config, tokenizer)
+    print(len(data_with_entities),'PRE')
     # data_without_entities = get_dataset(files_without_entities, num_gpus, gpu_id, data_config, tokenizer)
     data = tf.data.Dataset.sample_from_datasets(
         [data_with_entities],
         weights=[float(len(files_with_entities))],
         seed=42,
     )
+    print(len(data),'POST')
 
     data = data.shuffle(1000, reshuffle_each_iteration=True)
     data = data.batch(data_config.per_device_train_batch_size)

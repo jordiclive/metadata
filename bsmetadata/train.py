@@ -328,16 +328,16 @@ def main(args: CFG) -> None:
     # If resume_from_checkpoint_dir is not None, we load the resumed state
     # if args.resume_from_checkpoint_dir:
 
-    resume_from_checkpoint_dir = '/fsx/home-jordiclive/checkpoint-24000step/'
-    path = Path(resume_from_checkpoint_dir).resolve()
-    logger.info(f"Loading checkpoint from {path}")
-    if accelerator.distributed_type == DistributedType.DEEPSPEED:
-        # this is a deepspeed method, will load model, optimizer, scheduler
-        # `model` wraps the optimizer and scheduler
-        model.load_checkpoint(path)
-    else:
-        accelerator.load_state(path)
-    train_state = TrainState.load(Path(path) / "train_state.json")
+    # resume_from_checkpoint_dir = '/fsx/home-jordiclive/checkpoint-24000step/'
+    # path = Path(resume_from_checkpoint_dir).resolve()
+    # logger.info(f"Loading checkpoint from {path}")
+    # if accelerator.distributed_type == DistributedType.DEEPSPEED:
+    #     # this is a deepspeed method, will load model, optimizer, scheduler
+    #     # `model` wraps thet optimizer and scheduler
+    #     model.load_checkpoint(path)
+    # else:
+    #     accelerator.load_state(path)
+    # train_state = TrainState.load(Path(path) / "train_state.json")
 
     # set a random dataset size if streaming
     dl_size = int(1e6) if args.data_config.streaming else len(train_dataloader)
