@@ -143,13 +143,13 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
         return batch
 
     def get_data_iter(train_dataloader):
-        while True:
-            for batch in train_dataloader:
-                batch = to_dict(batch)
-                yield batch
+        c = 0
+        for batch in train_dataloader:
+            c +=1
+        return c
 
-    data = get_data_iter(data)
-    print('LEN DATA',len(data))
+    c = get_data_iter(data)
+    print('LEN DATA',c)
 
     return data, to_dict
 
