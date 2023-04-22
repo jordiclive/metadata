@@ -149,7 +149,7 @@ def get_dataloader(*, tokenizer, args, num_gpus, gpu_id,train=True):
                 yield batch
 
     data = get_data_iter(data)
-    len('LEN DATA',data)
+    print('LEN DATA',len(data))
 
     return data, to_dict
 
