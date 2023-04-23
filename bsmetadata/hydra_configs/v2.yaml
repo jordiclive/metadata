@@ -19,8 +19,8 @@ data_config:
       # 'Generation_length_sentence': 1.0097672628981422,
       # 'Generation_length_text': 1.0,
       # 'Paragraph': 1.0,
-#    metadata_list:
-    - html
+    metadata_list:
+    #- html
     - timestamp
     - website_description
     - title
