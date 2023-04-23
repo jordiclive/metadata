@@ -388,7 +388,7 @@ def main(args: CFG) -> None:
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
     # metrics_logger = Logger(is_local_main_process, project=args.project_name, config=config_dict)
     t_bs = args.data_config.per_device_train_batch_size*args.gradient_accumulation_steps*8
-    metrics_logger = Logger(is_local_main_process, name=f"80gb-metadata_prob=0,{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
+    metrics_logger = Logger(is_local_main_process, name=f"80gb-global,{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
         logger.info("Start with an evaluation")

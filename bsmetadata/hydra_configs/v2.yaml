@@ -19,7 +19,7 @@ data_config:
       # 'Generation_length_sentence': 1.0097672628981422,
       # 'Generation_length_text': 1.0,
       # 'Paragraph': 1.0,
-    metadata_list:
+#    metadata_list:
     - html
     - timestamp
     - website_description
@@ -27,9 +27,9 @@ data_config:
     - url
     - datasource
     - length
-    - entity_paragraph
+#    - entity_paragraph
     metadata_column_list:
-    - html
+#    - html
     - timestamp
     - website_desc
     - title
@@ -37,7 +37,7 @@ data_config:
     - generation_datasource
     #- generation_length_sentence
     #- generation_length_text
-    - entity_paragraph
+#    - entity_paragraph
     local_metadata_special_tokens: 
       entity_paragraph: "entity"
     metadata_sep: ' | '
