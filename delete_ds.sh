@@ -1,4 +1,4 @@
-dir="/fsx/home-jordiclive/tmp/metadata-run-html-no-global"
+dir="/fsx/home-jordiclive/tmp/metadata-run-no-entity_para"
 
 while true; do
     find "$dir" -type d -regex ".*/global_step[0-9]*" | while read -r folder; do
