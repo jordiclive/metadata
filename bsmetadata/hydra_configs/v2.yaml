@@ -20,7 +20,7 @@ data_config:
       # 'Generation_length_text': 1.0,
       # 'Paragraph': 1.0,
     metadata_list:
-    #- html
+    - html
     - timestamp
     - website_description
     - title
@@ -29,7 +29,7 @@ data_config:
     - length
 #    - entity_paragraph
     metadata_column_list:
-#    - html
+    - html
     - timestamp
     - website_desc
     - title
