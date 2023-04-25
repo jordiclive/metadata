@@ -389,7 +389,7 @@ def main(args: CFG) -> None:
     # metrics_logger = Logger(is_local_main_process, project=args.project_name, config=config_dict)
     t_bs = args.data_config.per_device_train_batch_size*args.gradient_accumulation_steps*8
     os.environ['WANDB_API_KEY'] = 'd8216641d549f9bb3d0c5074baa39e15dfd55030'
-    metrics_logger = Logger(is_local_main_process, name=f"80gb-global,{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
+    metrics_logger = Logger(is_local_main_process, name=f"80gb-0.25-html,{args.learning_rate}-{t_bs}",entity='jordanclive',project='metadata', config=config_dict)
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
         logger.info("Start with an evaluation")
