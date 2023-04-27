@@ -320,7 +320,7 @@ def main(args: CFG) -> None:
 
     # If resume_from_checkpoint_dir is not None, we load the resumed state
     #todo resume from ckpt
-    path = Path("/fsx/home-jordiclive/tmp/metadata-global/checkpoint-1000step/").resolve()
+    path = Path("/fsx/home-jordiclive/tmp/metadata-global/checkpoint-4000step").resolve()
     logger.info(f"Loading checkpoint from {path}")
     if accelerator.distributed_type == DistributedType.DEEPSPEED:
         # this is a deepspeed method, will load model, optimizer, scheduler
