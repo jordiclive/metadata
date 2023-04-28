@@ -319,16 +319,16 @@ def main(args: CFG) -> None:
     train_state = TrainState()
 
     # If resume_from_checkpoint_dir is not None, we load the resumed state
-    #todo resume from ckpt
-    path = Path("/fsx/home-jordiclive/tmp/metadata-global/checkpoint-3000step").resolve()
-    logger.info(f"Loading checkpoint from {path}")
-    if accelerator.distributed_type == DistributedType.DEEPSPEED:
-        # this is a deepspeed method, will load model, optimizer, scheduler
-        # `model` wraps the optimizer and scheduler
-        model.load_checkpoint(path)
-    else:
-        accelerator.load_state(path)
-    train_state = TrainState.load(Path(path) / "train_state.json")
+    # #todo resume from ckpt
+    # path = Path("/fsx/home-jordiclive/tmp/metadata-global/checkpoint-3000step").resolve()
+    # logger.info(f"Loading checkpoint from {path}")
+    # if accelerator.distributed_type == DistributedType.DEEPSPEED:
+    #     # this is a deepspeed method, will load model, optimizer, scheduler
+    #     # `model` wraps the optimizer and scheduler
+    #     model.load_checkpoint(path)
+    # else:
+    #     accelerator.load_state(path)
+    # train_state = TrainState.load(Path(path) / "train_state.json")
 
     if args.resume_from_checkpoint_dir:
         path = Path(args.resume_from_checkpoint_dir).resolve()
