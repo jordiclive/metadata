@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account laion
+#SBATCH --account eleuther
 #SBATCH --partition="g80"
 #SBATCH --job-name=flan2
 #SBATCH --gres=gpu:8
