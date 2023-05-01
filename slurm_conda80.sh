@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account stability
+#SBATCH --account laion
 #SBATCH --partition="g80"
 #SBATCH --job-name=flan2
 #SBATCH --gres=gpu:8
