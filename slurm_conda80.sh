@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account eleuther
+#SBATCH --account stability
 #SBATCH --partition="g80"
 #SBATCH --job-name=flan2
 #SBATCH --gres=gpu:8
