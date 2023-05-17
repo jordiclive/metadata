@@ -380,9 +380,9 @@ def main(args: CFG) -> None:
         if use_full_evaluation_for_val:
             results = evaluate_main(
                 output_file="eval.txt",
-                metadata_to_test="entity_paragraph",
+                # metadata_to_test="entity_paragraph",
 
-                # metadata_to_test="title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
+                metadata_to_test="title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
                 model = model,
                 tokenizer = tokenizer,
                 accelerator = accelerator
