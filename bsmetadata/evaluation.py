@@ -278,7 +278,7 @@ def evaluate_main(
     config_file_path: str = None,
     model: str = None,
     tokenizer: str = None,
-    device: = None
+    device = None
 ) -> dict:
     if config_file_path is None:
         try:
