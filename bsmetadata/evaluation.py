@@ -180,6 +180,7 @@ def get_mean_loss(
     batch: Dict[str, torch.Tensor],
     save_data: bool = False,
     idx: int = None,
+    model = None,
 ) -> torch.Tensor:
     """Prepares the arguments for perplexity calculation and passes them to the perplexity function.
 
@@ -419,11 +420,11 @@ def evaluate_main(
                     # rich.print(tokenizer.decode(metadata_batch["input_ids"][0]))
 
                 # Calculate nll (natural-log loss)
-                normal_nll, normal_example_len = get_mean_loss(normal_batch, save_data=save_data, idx=idx)  # [0]
+                normal_nll, normal_example_len = get_mean_loss(normal_batch, save_data=save_data, idx=idx,model=model)  # [0]
                 # print("PPL")
                 # print(normal_ppl)
                 total_normal_nll.append(normal_nll)  # * normal_example_len
-                metadata_nll, metadata_example_len = get_mean_loss(metadata_batch, save_data=save_data, idx=idx)  # [0]
+                metadata_nll, metadata_example_len = get_mean_loss(metadata_batch, save_data=save_data, idx=idx,model=model)  # [0]
                 # print(metadata_ppl)
                 total_metadata_nll.append(metadata_nll)  # * metadata_example_len
 
