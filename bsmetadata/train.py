@@ -381,6 +381,8 @@ def main(args: CFG) -> None:
             results = evaluate_main(
                 output_file="eval.txt",
                 metadata_to_test="title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
+                model = model,
+                tokenizer = tokenizer,
             )
             for k, v in results.items():
                 metrics_logger.log({k: v})
