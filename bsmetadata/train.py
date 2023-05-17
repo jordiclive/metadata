@@ -383,7 +383,7 @@ def main(args: CFG) -> None:
                 metadata_to_test="title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
                 model = model,
                 tokenizer = tokenizer,
-                device = accelerator
+                accelerator = accelerator
             )
             model.train()
             for k, v in results.items():
