@@ -278,6 +278,7 @@ def evaluate_main(
     config_file_path: str = None,
     model: str = None,
     tokenizer: str = None,
+    device: = None
 ) -> dict:
     if config_file_path is None:
         try:
@@ -399,7 +400,10 @@ def evaluate_main(
                 normal_batch = default_data_collator([normal_example])
                 metadata_example["labels"] = metadata_example["input_ids"]
                 metadata_batch = default_data_collator([metadata_example])
-                if not no_cuda:
+                if device is not None:
+                    normal_batch = {k: v.to(accelerator.device) for k, v in normal_batch.items()}
+                    metadata_batch = {k: v.to(accelerator.device) for k, v in metadata_batch.items()}
+                elif not no_cuda:
                     normal_batch = {k: v.cuda() for k, v in normal_batch.items()}
                     metadata_batch = {k: v.cuda() for k, v in metadata_batch.items()}
                 if n_examples == 1:
