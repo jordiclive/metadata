@@ -61,8 +61,10 @@ class DataConfig:
         default=False,
         metadata={"help": "Whether to use streaming mode. Note that validation will not be streamed."},
     )
-
-
+    use_full_evaluation_for_val: bool = field(
+        default=False,
+        metadata={"help": "Whether to use streaming mode. Note that validation will not be streamed."},
+    )
 def get_dataloaders(tokenizer, cfg: DataConfig):
     """
     Args:

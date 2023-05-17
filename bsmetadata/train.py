@@ -89,9 +89,7 @@ class CFG:
     gradient_checkpointing: bool = field(
         default=False, metadata={"help": "Whether to use gradient_checkpointing to save memory."}
     )
-    use_full_evaluation_for_val: bool = field(
-        default=False, metadata={"help": "Whether to use full evaluation for val"}
-    )
+
 
 
 cs = ConfigStore.instance()
