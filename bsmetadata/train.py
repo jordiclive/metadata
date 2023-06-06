@@ -10,15 +10,15 @@ from itertools import chain
 from pathlib import Path
 from typing import List, Optional, Union, get_args, get_origin
 
-import hydra
+# import hydra
 import torch
 import torch.nn.functional as F
 import wandb
 from accelerate import Accelerator
 from accelerate.utils import DistributedType, DummyOptim, DummyScheduler
 from evaluation import evaluate_main
-from hydra.core.config_store import ConfigStore
-from omegaconf import OmegaConf
+# from hydra.core.config_store import ConfigStore
+# from omegaconf import OmegaConf
 from tqdm.auto import tqdm as original_tqdm
 from transformers import AdamW, AddedToken, AutoConfig, AutoModelForCausalLM, AutoTokenizer, get_scheduler, set_seed
 from transformers.trainer_utils import IntervalStrategy
@@ -92,8 +92,8 @@ class CFG:
     )
 
 
-cs = ConfigStore.instance()
-cs.store(name="config", node=CFG)
+# cs = ConfigStore.instance()
+# cs.store(name="config", node=CFG)
 
 
 def show_help(context="", cls=CFG):
@@ -190,42 +190,65 @@ def instantiate_data_class(data_class, args):
     return args
 
 
-@hydra.main(config_path="hydra_configs", config_name="config")
+# @hydra.main(config_path="hydra_configs", config_name="config")
 def main(args: CFG) -> None:
-    print(OmegaConf.to_yaml(args))
+    # print(OmegaConf.to_yaml(args))
     # write the yaml to a file
-    path = Path(args.out_dir).resolve() / "actual_config.yaml"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w") as f:
-        f.write(OmegaConf.to_yaml(args))
-        logger.info(f"Wrote actual config to {path}")
+    # path = Path(args.out_dir).resolve() / "actual_config.yaml"
+    # path.parent.mkdir(parents=True, exist_ok=True)
+    # with open(path, "w") as f:
+    #     f.write(OmegaConf.to_yaml(args))
+    #     logger.info(f"Wrote actual config to {path}")
 
-    config_dict = OmegaConf.to_container(args)
-    # The dataset library use the hash of the arguments to create the cache
-    # name. Without this transformation the hash of args is not deterministic
-    args = OmegaConf.to_object(args)
+    # config_dict = OmegaConf.to_container(args)
+    # # The dataset library use the hash of the arguments to create the cache
+    # # name. Without this transformation the hash of args is not deterministic
+    # args = OmegaConf.to_object(args)
 
     # if the yaml file is used to create the config, the args are not dataclass up to this step
     # need to convert them back to dataclass via OmegaConf
-    if not dataclasses.is_dataclass(args):
-        args = instantiate_data_class(CFG, args)
-        assert dataclasses.is_dataclass(args)
-        assert dataclasses.is_dataclass(args.data_config)
-        assert dataclasses.is_dataclass(args.data_config.metadata_config)
+    # if not dataclasses.is_dataclass(args):
+    #     args = instantiate_data_class(CFG, args)
+    #     assert dataclasses.is_dataclass(args)
+    #     assert dataclasses.is_dataclass(args.data_config)
+    #     assert dataclasses.is_dataclass(args.data_config.metadata_config)
+    #
+    # set_seed(args.seed)
+    # accelerator = Accelerator()
+    # is_local_main_process = accelerator.is_local_main_process
+    # tqdm = partial(original_tqdm, disable=not is_local_main_process, position=0)
+    # use_deepspeed = accelerator.state.deepspeed_plugin is not None
+    # use_deepspeed_optimzer = use_deepspeed or "optimizer" in accelerator.state.deepspeed_plugin.deepspeed_config
+    # use_deepspeed_scheduler = use_deepspeed or "scheduler" in accelerator.state.deepspeed_plugin.deepspeed_config
+    #
+    # if accelerator.distributed_type == DistributedType.DEEPSPEED and not use_deepspeed_scheduler:
+    #     assert False, "Please set scheduler in DeepSpeed config file otherwise it may not be checkpointed properly"
+    #
+    # os.makedirs(args.out_dir, exist_ok=True)
 
-    set_seed(args.seed)
-    accelerator = Accelerator()
-    is_local_main_process = accelerator.is_local_main_process
-    tqdm = partial(original_tqdm, disable=not is_local_main_process, position=0)
-    use_deepspeed = accelerator.state.deepspeed_plugin is not None
-    use_deepspeed_optimzer = use_deepspeed or "optimizer" in accelerator.state.deepspeed_plugin.deepspeed_config
-    use_deepspeed_scheduler = use_deepspeed or "scheduler" in accelerator.state.deepspeed_plugin.deepspeed_config
+    import yaml
 
-    if accelerator.distributed_type == DistributedType.DEEPSPEED and not use_deepspeed_scheduler:
-        assert False, "Please set scheduler in DeepSpeed config file otherwise it may not be checkpointed properly"
+    class DataConfig:
+        def __init__(self, dictionary):
+            for k, v in dictionary.items():
+                if isinstance(v, dict):
+                    setattr(self, k, DataConfig(v))
+                else:
+                    setattr(self, k, v)
 
-    os.makedirs(args.out_dir, exist_ok=True)
+        @property
+        def values(self):
+            return list(vars(self).values())
 
+    # Load YAML file
+    with open('/Users/jordanclive/Personal_git/metadata/bsmetadata/hydra_configs/v2.yaml', 'r') as stream:
+        data_loaded = yaml.safe_load(stream)
+
+    # Convert to Python object
+    data_config = DataConfig(data_loaded['data_config'])
+    args = DataConfig(data_loaded)
+    args.data_config = DataConfig(data_loaded['data_config'])
+    args.data_config.metadata_config = DataConfig(data_loaded['data_config']['metadata_config'])
     config = AutoConfig.from_pretrained(args.model_name)
     config.gradient_checkpointing = args.gradient_checkpointing
     config.use_cache = not args.gradient_checkpointing  # to disable warning
@@ -237,8 +260,8 @@ def main(args: CFG) -> None:
             chain.from_iterable(
                 (start_token, end_token)
                 for start_token, end_token in zip(
-                    args.data_config.metadata_config.local_metadata_special_token_start.values(),
-                    args.data_config.metadata_config.local_metadata_special_token_end.values(),
+                    args.data_config.metadata_config.local_metadata_special_token_start.values,
+                    args.data_config.metadata_config.local_metadata_special_token_end.values,
                 )
             )
         )
@@ -541,15 +564,15 @@ def main(args: CFG) -> None:
 
 
 if __name__ == "__main__":
-    if "--help" in sys.argv or "-h" in sys.argv:
-        show_help()
-        sys.exit()
-    newargv = []
-    for arg in sys.argv:
-        if arg.startswith("--local_rank"):
-            pass
-        else:
-            newargv.append(arg)
-    sys.argv = newargv
-
-    main()
+    # if "--help" in sys.argv or "-h" in sys.argv:
+    #     show_help()
+    #     sys.exit()
+    # newargv = []
+    # for arg in sys.argv:
+    #     if arg.startswith("--local_rank"):
+    #         pass
+    #     else:
+    #         newargv.append(arg)
+    # sys.argv = newargv
+    x = 1
+    main(x)
