@@ -146,3 +146,86 @@ def get_dummy_dataloader(batch_size):
         num_workers=0,
         pin_memory=True,
     )
+
+if __name__ == '__main__':
+    import yaml
+
+    data_config_yaml = """
+    streaming: True
+    validation_size_max: 1024
+    use_full_evaluation_for_val: true
+    metadata_config:
+      random_sample_metadata: true
+      random_sample_metadata_calculate_size: 16384
+      random_sample_metadata_weights:
+        html: 1.0
+        timestamp: 11.335125448028673
+        website_desc: 10.532889258950874
+        title: 1.0657717366883845
+        generation_datasource: 1.0
+        entity_paragraph: 1.028817740667444
+        generation_length_text: 1.0
+      metadata_list:
+      - html
+      - timestamp
+      - website_description
+      - title
+      - url
+      - datasource
+      - length
+      - entity_paragraph
+      - generation_length_text
+      metadata_column_list:
+      - html
+      - timestamp
+      - website_desc
+      - title
+      - generation_datasource
+      - generation_length_text
+      - entity_paragraph
+      local_metadata_special_tokens:
+        entity_paragraph: "entity"
+      metadata_sep: ' | '
+      metadata_key_value_sep: ': '
+      metadata_probability: 0.5
+      treat_local_metadata_as_regular_text: true
+      add_local_metadata_special_tokens_in_prefix: true
+      metadata_prefix_sep: ' |||'
+      metadata_prefix_start_seq: ''
+      max_seq_len: 1024
+      html_parser_config:
+        all_tags_rules:
+          attributes_to_keep:
+          - class
+          - id
+          txt_max_chr_len: 0
+          txt_min_chr_len: -.inf
+          tags_exceptions_to_txt_max_min_chr_len:
+          - table
+          - tr
+          - th
+          - td
+          - colgroup
+          - thead
+          - tfoot
+          - tbody
+        tags_to_remove_alone_tag_name:
+        - body
+        tags_to_remove_alone_txt_max_chr_len:
+        - .inf
+        tags_to_remove_alone_txt_min_chr_len:
+        - 0.0
+      local_metadata_special_token_start:
+          entity_paragraph: "<ENTITY_CHAIN>"
+          html: "<HTML>"
+      local_metadata_special_token_end:
+          entity_paragraph: " </ENTITY_CHAIN> "
+          html: "</HTML>"
+      local_metadata_special_token_state: true
+      html_overall_sample_rate: 0.5
+      without_metadata_same_context: false
+    """
+
+    data_config = yaml.safe_load(data_config_yaml)
+    x = 1
+    # data_with_entities = get_dataset(files_with_entities, num_gpus=0, gpu_id=None, data_config, tokenizer=)
