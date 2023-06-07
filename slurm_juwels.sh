@@ -3,8 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:4
 #SBATCH --time=06:00:00
-#SBATCH --ntasks-per-node=8
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=32
 #SBATCH --partition=booster
 #SBATCH --job-name=qlora
 #SBATCH --output=%x_%j.out
