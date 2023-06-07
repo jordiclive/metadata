@@ -7,6 +7,7 @@
 #SBATCH --cpus-per-task=12
 #SBATCH --partition=booster
 #SBATCH --job-name=qlora
+#SBATCH --output=%x_%j.out
 
 source /p/project/ccstdl/clive1/miniconda3/bin/activate gptneox
 
