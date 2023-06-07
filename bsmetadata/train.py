@@ -25,6 +25,37 @@ from transformers.trainer_utils import IntervalStrategy
 
 from bsmetadata.input_pipeline import DataConfig, get_dataloaders
 
+import os
+
+def find_last_modified_folder(path):
+    # get all entries in the directory w/ stats
+    entries = (os.path.join(path, p) for p in os.listdir(path))
+    entries = ((os.stat(path), path) for path in entries)
+
+    # leave only directories, insert creation date
+    entries = ((stat[8], path)
+               for stat, path in entries if os.path.isdir(path))
+
+    try:
+        return max(entries)[1]
+    except ValueError:
+        # if the directory is empty
+        return None
+
+def find_second_last_modified_folder(path):
+    # get all entries in the directory w/ stats
+    entries = (os.path.join(path, p) for p in os.listdir(path))
+    entries = ((os.stat(path), path) for path in entries)
+
+    # leave only directories, insert creation date
+    entries = sorted((stat[8], path)
+               for stat, path in entries if os.path.isdir(path))
+
+    try:
+        return entries[-2][1] if len(entries) > 1 else None
+    except ValueError:
+        # if the directory is empty or has only one directory
+        return None
 
 logger = logging.getLogger(__name__)
 
@@ -319,17 +350,35 @@ def main(args: CFG) -> None:
         eval_dataloaders = {k: accelerator.prepare(v) for k, v in eval_dataloaders.items()}
     train_state = TrainState()
 
-    # If resume_from_checkpoint_dir is not None, we load the resumed state
-    if args.resume_from_checkpoint_dir:
-        path = Path(args.resume_from_checkpoint_dir).resolve()
-        logger.info(f"Loading checkpoint from {path}")
-        if accelerator.distributed_type == DistributedType.DEEPSPEED:
-            # this is a deepspeed method, will load model, optimizer, scheduler
-            # `model` wraps the optimizer and scheduler
-            model.load_checkpoint(path)
-        else:
-            accelerator.load_state(path)
-        train_state = TrainState.load(Path(path) / "train_state.json")
+    last_ckpt = find_last_modified_folder(args.out_dir)
+    if last_ckpt is not None:
+        try:
+            path = Path(last_ckpt).resolve()
+            logger.info(f"Loading checkpoint from {path}")
+            if accelerator.distributed_type == DistributedType.DEEPSPEED:
+                # this is a deepspeed method, will load model, optimizer, scheduler
+                # `model` wraps the optimizer and scheduler
+                model.load_checkpoint(path)
+            else:
+                accelerator.load_state(path)
+            train_state = TrainState.load(Path(path) / "train_state.json")
+        except:
+            logger.warning(f"Failed to load checkpoint from {path}, trying second last modified folder.")
+            second_last_folder = find_second_last_modified_folder(args.out_dir)
+            if second_last_folder is not None:
+                path = Path(second_last_folder).resolve()
+                logger.info(f"Loading checkpoint from {path}")
+                if accelerator.distributed_type == DistributedType.DEEPSPEED:
+                    model.load_checkpoint(path)
+                else:
+                    accelerator.load_state(path)
+                train_state = TrainState.load(Path(path) / "train_state.json")
+            else:
+                logger.error("No second last modified folder to load from.")
+        finally:
+            logger.info("start from scratch")
+
+
 
     # set a random dataset size if streaming
     dl_size = int(1e6) if args.data_config.streaming else len(train_dataloader)
