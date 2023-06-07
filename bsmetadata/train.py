@@ -351,6 +351,7 @@ def main(args: CFG) -> None:
     train_state = TrainState()
 
     last_ckpt = find_last_modified_folder(args.out_dir)
+    print('LAST_ckpt', last_ckpt)
     if last_ckpt is not None:
         try:
             path = Path(last_ckpt).resolve()
