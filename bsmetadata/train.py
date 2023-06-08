@@ -357,6 +357,7 @@ def main(args: CFG) -> None:
     logger.info(f'LAST_ckpt {last_ckpt})')
     print('SECOND_LAST_CKPT', second_last_folder)
     logger.info(f'SECOND_LAST_ckpt {last_ckpt})')
+    second_last_folder = '/fsx/home-jordiclive/tmp/metadata-html-half/checkpoint-500step/'
     # if last_ckpt is not None:
     #     try:
     #         path = Path(last_ckpt).resolve()
