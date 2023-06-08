@@ -351,33 +351,37 @@ def main(args: CFG) -> None:
     train_state = TrainState()
 
     last_ckpt = find_last_modified_folder(args.out_dir)
+    second_last_folder = find_second_last_modified_folder(args.out_dir)
+
     print('LAST_ckpt', last_ckpt)
-    if last_ckpt is not None:
-        try:
-            path = Path(last_ckpt).resolve()
+    logger.info(f'LAST_ckpt {last_ckpt})')
+    print('SECOND_LAST_CKPT', second_last_folder)
+    logger.info(f'SECOND_LAST_ckpt {last_ckpt})')
+    # if last_ckpt is not None:
+    #     try:
+    #         path = Path(last_ckpt).resolve()
+    #         logger.info(f"Loading checkpoint from {path}")
+    #         if accelerator.distributed_type == DistributedType.DEEPSPEED:
+    #             # this is a deepspeed method, will load model, optimizer, scheduler
+    #             # `model` wraps the optimizer and scheduler
+    #             model.load_checkpoint(path)
+    #         else:
+    #             accelerator.load_state(path)
+    #         train_state = TrainState.load(Path(path) / "train_state.json")
+    #     except:
+    try:
+        if second_last_folder is not None:
+            path = Path(second_last_folder).resolve()
             logger.info(f"Loading checkpoint from {path}")
             if accelerator.distributed_type == DistributedType.DEEPSPEED:
-                # this is a deepspeed method, will load model, optimizer, scheduler
-                # `model` wraps the optimizer and scheduler
                 model.load_checkpoint(path)
             else:
                 accelerator.load_state(path)
             train_state = TrainState.load(Path(path) / "train_state.json")
-        except:
-            logger.warning(f"Failed to load checkpoint from {path}, trying second last modified folder.")
-            second_last_folder = find_second_last_modified_folder(args.out_dir)
-            if second_last_folder is not None:
-                path = Path(second_last_folder).resolve()
-                logger.info(f"Loading checkpoint from {path}")
-                if accelerator.distributed_type == DistributedType.DEEPSPEED:
-                    model.load_checkpoint(path)
-                else:
-                    accelerator.load_state(path)
-                train_state = TrainState.load(Path(path) / "train_state.json")
-            else:
-                logger.error("No second last modified folder to load from.")
-        finally:
-            logger.info("start from scratch")
+        else:
+            logger.error("No second last modified folder to load from.")
+    except:
+        logger.info("start from scratch")
 
 
 
