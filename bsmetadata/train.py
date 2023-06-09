@@ -39,8 +39,7 @@ def find_last_modified_folder(path):
 
     try:
         return max(entries)[1]
-    except ValueError:
-        # if the directory is empty or directories do not contain numbers in their names
+    except:
         return None
 
 
@@ -57,8 +56,7 @@ def find_second_last_modified_folder(path):
 
     try:
         return entries[-2][1] if len(entries) > 1 else None
-    except ValueError:
-        # if the directory is empty or has only one directory or directories do not contain numbers in their names
+    except:
         return None
 
 logger = logging.getLogger(__name__)
