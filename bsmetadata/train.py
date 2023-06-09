@@ -353,11 +353,11 @@ def main(args: CFG) -> None:
     last_ckpt = find_last_modified_folder(args.out_dir)
     second_last_folder = find_second_last_modified_folder(args.out_dir)
 
-    print('LAST_ckpt', last_ckpt)
-    logger.info(f'LAST_ckpt {last_ckpt})')
-    print('SECOND_LAST_CKPT', second_last_folder)
-    logger.info(f'SECOND_LAST_ckpt {last_ckpt})')
-    second_last_folder = '/fsx/home-jordiclive/tmp/metadata-html-half/checkpoint-500step/'
+    # print('LAST_ckpt', last_ckpt)
+    # logger.info(f'LAST_ckpt {last_ckpt})')
+    # print('SECOND_LAST_CKPT', second_last_folder)
+    # logger.info(f'SECOND_LAST_ckpt {last_ckpt})')
+    # second_last_folder = '/fsx/home-jordiclive/tmp/metadata-html-half/checkpoint-500step/'
     # if last_ckpt is not None:
     #     try:
     #         path = Path(last_ckpt).resolve()
@@ -382,6 +382,9 @@ def main(args: CFG) -> None:
         else:
             logger.error("No second last modified folder to load from.")
     except:
+        logger.info("Last modified ckpt: {}".format(last_ckpt))
+
+        raise ValueError(f"No checkpoint found at {args.out_dir}, 2nd: {second_last_folder} , 1st:{last_ckpt}")
         logger.info("start from scratch")
 
 
