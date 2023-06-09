@@ -26,35 +26,39 @@ from transformers.trainer_utils import IntervalStrategy
 from bsmetadata.input_pipeline import DataConfig, get_dataloaders
 
 import os
-
+import re
 def find_last_modified_folder(path):
     # get all entries in the directory w/ stats
+    # get all entries in the directory w/ stats
     entries = (os.path.join(path, p) for p in os.listdir(path))
-    entries = ((os.stat(path), path) for path in entries)
 
-    # leave only directories, insert creation date
-    entries = ((stat[8], path)
-               for stat, path in entries if os.path.isdir(path))
+    # leave only directories and find the largest number in their names
+    entries = ((max(map(int, re.findall(r'\d+', name))), name)
+               for name in entries if os.path.isdir(name))
+    entries = list(filter(lambda x: isinstance(x[0], int), entries))
 
     try:
         return max(entries)[1]
     except ValueError:
-        # if the directory is empty
+        # if the directory is empty or directories do not contain numbers in their names
         return None
+
 
 def find_second_last_modified_folder(path):
     # get all entries in the directory w/ stats
+    # get all entries in the directory w/ stats
     entries = (os.path.join(path, p) for p in os.listdir(path))
-    entries = ((os.stat(path), path) for path in entries)
 
-    # leave only directories, insert creation date
-    entries = sorted((stat[8], path)
-               for stat, path in entries if os.path.isdir(path))
+    # leave only directories and find the largest number in their names
+    entries = ((max(map(int, re.findall(r'\d+', name))), name)
+               for name in entries if os.path.isdir(name))
+    entries = list(filter(lambda x: isinstance(x[0], int), entries))
+    entries = sorted(entries)
 
     try:
         return entries[-2][1] if len(entries) > 1 else None
     except ValueError:
-        # if the directory is empty or has only one directory
+        # if the directory is empty or has only one directory or directories do not contain numbers in their names
         return None
 
 logger = logging.getLogger(__name__)
