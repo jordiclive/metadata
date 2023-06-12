@@ -53,16 +53,16 @@ if __name__ == '__main__':
         os.chdir(ckpt_dir)
         folders_to_upload = upload_folders_missing(user, repo_name)
         print(folders_to_upload)
-    #     for model in folders_to_upload:
-    #         hf_api.upload_folder(
-    #
-    #             folder_path=model,
-    #
-    #             path_in_repo=".",
-    #
-    #             repo_id=full_repo_name,
-    #
-    #             repo_type="model",
-    #
-    #         )
+        for model in folders_to_upload:
+            hf_api.upload_folder(
+
+                folder_path=model,
+
+                path_in_repo=".",
+
+                repo_id=full_repo_name,
+
+                repo_type="model",
+
+            )
         time.sleep(3600)
