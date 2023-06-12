@@ -51,7 +51,7 @@ if __name__ == '__main__':
     while True:
         import os
         os.chdir(ckpt_dir)
-        folders_to_upload = upload_folders_missing(user, repo_name)
+        folders_to_upload, folders_to_remove = upload_folders_missing(user, repo_name)
         print(folders_to_upload)
         for model in folders_to_upload:
             hf_api.upload_folder(
