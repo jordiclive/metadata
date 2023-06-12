@@ -396,7 +396,7 @@ if __name__ == '__main__':
     data_config.metadata_config.entity_setting = 'beg'
     print(data_config.metadata_config.metadata_column_list)
     import transformers
-    tokenizer = transformers.AutoTokenizer.from_pretrained("tokenizer")
+    tokenizer = transformers.AutoTokenizer.from_pretrained("/Users/jordanclive/Personal_git/metadata/NEW_tok")
     x = 1
     dataset = [Path("/Users/jordanclive/Personal_git/metadata/local-data/datasets--bs-modeling-metadata--c4-en-html-with-training_metadata_all/snapshots/8f2615d8b8580e89533b90bc3931e0b99ef15aec/c4-en-html_cc-main-2019-18_pq00-001.jsonl.gz")]
     data_with_entities = get_dataset(dataset, num_gpus=0, gpu_id=0, data_config=data_config, tokenizer=tokenizer)
