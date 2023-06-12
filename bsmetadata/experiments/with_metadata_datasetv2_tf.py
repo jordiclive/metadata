@@ -263,13 +263,19 @@ if __name__ == '__main__':
                                           'length', 'entity_paragraph', 'generation_length_text']
                     self.metadata_column_list = ['html', 'timestamp', 'website_desc', 'title', 'generation_datasource',
                                                  'generation_length_text', 'entity_paragraph']
-                    self.local_metadata_special_tokens = {'entity_paragraph': "entity"}
-                    self.metadata_sep = ' | '
-                    self.metadata_key_value_sep = ': '
+                    self.local_metadata_special_tokens = {'entity_paragraph': "<special_entity>", "html": "<special_html>"}
+                    self.prefix_sep_tokens = {
+                        'title': "<special_title>",
+                        'website_description': "<special_website_description>",
+                        'datasource': "<special_datasource>",
+                        'text_length': "<special_text_length>"
+                    }
+                    self.metadata_sep = ''
+                    self.metadata_key_value_sep = ''
                     self.metadata_probability = 0.5
                     self.treat_local_metadata_as_regular_text = True
                     self.add_local_metadata_special_tokens_in_prefix = True
-                    self.metadata_prefix_sep = ' |||'
+                    self.metadata_prefix_sep = '<prefix_sep>'
                     self.metadata_prefix_start_seq = ''
                     self.max_seq_len = 1024
                     self.html_parser_config = self.HtmlParserConfig()

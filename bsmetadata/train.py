@@ -265,9 +265,12 @@ def main(args: CFG) -> None:
                 )
             )
         )
+        new_tokens.append(args.data_config.metadata_config.metadata_prefix_sep)
+        new_tokens.extend(args.data_config.metadata_config.prefix_sep_tokens)
         new_tokens = [
             AddedToken(token, rstrip=False, lstrip=False, single_word=False, normalized=False) for token in new_tokens
         ]
+
         tokenizer = AutoTokenizer.from_pretrained(args.model_name, additional_special_tokens=new_tokens)
         model.resize_token_embeddings(len(tokenizer))
     else:
