@@ -34,7 +34,7 @@ def upload_folders_missing(user, repo_name):
 
 if __name__ == '__main__':
     user = "bs-modeling-metadata"
-    repo_name = "checkpoints_all_06_12_html_0.5_special_tokens"
+    repo_name = "checkpoints_all_06_12_html_special_tokens_0.5"
     full_repo_name = f"{user}/{repo_name}"
     ckpt_dir = "/fsx/home-jordiclive/tmp/metadata-html-half"
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
                 folder_path=model,
 
-                path_in_repo=".",
+                path_in_repo=model,
 
                 repo_id=full_repo_name,
 
