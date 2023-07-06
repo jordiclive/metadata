@@ -384,6 +384,7 @@ def main(args: CFG) -> None:
             train_state = TrainState.load(Path(path) / "train_state.json")
         else:
             logger.error("No second last modified folder to load from.")
+            raise ValueError("No second last modified folder to load from.")
     except:
         logger.info("Last modified ckpt: {}".format(last_ckpt))
         second_last_folder = "/fsx/home-jordiclive/tmp/metadata-html-half/ckpt_7500/checkpoint-7500step"
