@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --cpus-per-task=12
 #SBATCH --output=%x_%j.out
-source /fsx/home-jordiclive/miniconda3/bin/activate jordan_meta
+source /admin/home-jordiclive/miniconda3/bin/activate jordan_meta
 cd /fsx/home-jordiclive/metadata
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
 export TRANSFORMERS_CACHE=/fsx/home-jordiclive/transformers_cache
