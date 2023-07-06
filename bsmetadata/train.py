@@ -372,6 +372,7 @@ def main(args: CFG) -> None:
     #             accelerator.load_state(path)
     #         train_state = TrainState.load(Path(path) / "train_state.json")
     #     except:
+
     try:
         if second_last_folder is not None:
             path = Path(second_last_folder).resolve()
@@ -385,9 +386,16 @@ def main(args: CFG) -> None:
             logger.error("No second last modified folder to load from.")
     except:
         logger.info("Last modified ckpt: {}".format(last_ckpt))
-
-        raise ValueError(f"No checkpoint found at {args.out_dir}, 2nd: {second_last_folder} , 1st:{last_ckpt}")
-        logger.info("start from scratch")
+        second_last_folder = "/fsx/home-jordiclive/tmp/metadata-html-half/ckpt_7500/checkpoint-7500step"
+        path = Path(second_last_folder).resolve()
+        logger.info(f"Loading checkpoint from {path}")
+        if accelerator.distributed_type == DistributedType.DEEPSPEED:
+            model.load_checkpoint(path)
+        else:
+            accelerator.load_state(path)
+        train_state = TrainState.load(Path(path) / "train_state.json")
+        # raise ValueError(f"No checkpoint found at {args.out_dir}, 2nd: {second_last_folder} , 1st:{last_ckpt}")
+        # logger.info("start from scratch")
 
 
 
