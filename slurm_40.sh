@@ -10,7 +10,7 @@ source /admin/home-jordiclive/miniconda3/bin/activate jordan_meta
 cd /fsx/home-jordiclive/metadata
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
 export TRANSFORMERS_CACHE=/fsx/home-jordiclive/transformers_cache
-
+export DS_SKIP_CUDA_CHECK=1
 #export HF_DATASETS_OFFLINE=1
 #export TRANSFORMERS_OFFLINE=1
 #export WANDB_MODE=offline
