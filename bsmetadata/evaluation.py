@@ -64,6 +64,7 @@ def mean_loss_fn(
     save_data: bool = False,
     idx: int = None,
     additional_special_token_ids: List[int] = None,
+    tokenizer = None,
 ) -> torch.Tensor:
     """Calculates the perplexity for a given batch.
 
@@ -88,7 +89,7 @@ def mean_loss_fn(
     if metadata_mask is not None:
         # Only patch special tokens when metadata is on
         for special_token_id in additional_special_token_ids:
-            shift_logits[:, :, special_token_id] = float("-inf")
+            shift_logits[:, :, special_token_id] = torch.finfo(lm_logits.dtype).min
 
         metadata_mask = metadata_mask.bool()
         nonmetadata_cumsum = torch.cumsum(~metadata_mask, dim=-1)
@@ -204,6 +205,8 @@ def get_mean_loss(
     save_data: bool = False,
     idx: int = None,
     additional_special_token_ids: List[int] = None,
+    model=None,
+    tokenizer = None,
 ) -> torch.Tensor:
     """Prepares the arguments for perplexity calculation and passes them to the perplexity function.
 
@@ -228,6 +231,7 @@ def get_mean_loss(
         save_data=save_data,
         idx=idx,
         additional_special_token_ids=additional_special_token_ids,
+        tokenizer=tokenizer,
     )
     return nll
 
@@ -426,108 +430,123 @@ def shorten_metadata_name(orig_name):
         return "".join(word[0] for word in words)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--repo_id",
-        type=str,
-        default="bs-modeling-metadata/checkpoints_all_04_23",
-        help="Repository ID for the model to compute perplexity for",
-    )
-    parser.add_argument(
-        "--subfolder",
-        type=str,
-        default="checkpoint-2500step",
-        help="subfolder in the respository with the specific checkpoint to evaluate perplexity for",
-    )
-    parser.add_argument(
-        "--config_file_path",
-        type=str,
-        help="The path actual_config.yaml if available, otherwise repo_id/actual_config.yaml or git clone's v2.yaml",
-    )
-    parser.add_argument(
-        "--output_file", type=str, default="evaluation.txt", help="Path to the file the perplexity is written to"
-    )
-    parser.add_argument("--no_cuda", action="store_true", help="If set to true, all computations are performed on CPU")
-    parser.add_argument(
-        "--save_data",
-        action="store_true",
-        help="If set to true, save tokens & losses",
-    )
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help="If set to true, the script runs in test mode and only takes 10 examples per dataset",
-    )
-    parser.add_argument(
-        "--max_n_examples",
-        type=int,
-        default=1500,
-        help="how many examples per metadata type to evaluate",
-    )
-    parser.add_argument(
-        "--metadata_to_test",
-        type=str,
-        default="html,entity_paragraph,website_desc,generation_datasource,timestamp,title,generation_length_text",
-        help="metadata types to test",
-    )
-    parser.add_argument(
-        "--test_aforesaid_metadata_together",
-        action="store_true",
-        help="If true, it will test all of designated (by --metadata_to_test) types per example at once",
-    )
-    parser.add_argument(
-        "--include_chunked_examples",
-        action="store_true",
-        help="If true, an example longer than max_seq_len will be included with the same text chunks",
-    )
-    parser.add_argument("--dedupe", action="store_true", help="If true, drop duplicated text")
-    parser.add_argument(
-        "--untrained",
-        action="store_true",
-        help="If set to true, will load --untrained_model_name (default to gpt2-xl)",
-    )
-    parser.add_argument(
-        "--untrained_model_name",
-        type=str,
-        default="gpt2-xl",
-        help="If --untrained, will load this model and its tokenizer; mostly for --prompt",
-    )
-    parser.add_argument(
-        "--prompt",
-        action="store_true",
-        help="If set to true, the script evaluates metadata in prompt style",
-    )
+# if __name__ == "__main__":
 
-    args = parser.parse_args()
-    print(f"Parameters: {args}")
 
-    # Load config
-    if args.config_file_path:
-        config_file_path = args.config_file_path
-    else:
-        try:
-            config_file_path = hf_hub_download(
-                repo_id=args.repo_id, filename="actual_config.yaml", use_auth_token=True
-            )
-        except Exception:
-            config_file_path = "bsmetadata/hydra_configs/v2.yaml"
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument(
+#         "--repo_id",
+#         type=str,
+#         default="bs-modeling-metadata/checkpoints_all_04_23",
+#         help="Repository ID for the model to compute perplexity for",
+#     )
+#     parser.add_argument(
+#         "--subfolder",
+#         type=str,
+#         default="checkpoint-2500step",
+#         help="subfolder in the respository with the specific checkpoint to evaluate perplexity for",
+#     )
+#     parser.add_argument(
+#         "--config_file_path",
+#         type=str,
+#         help="The path actual_config.yaml if available, otherwise repo_id/actual_config.yaml or git clone's v2.yaml",
+#     )
+#     parser.add_argument(
+#         "--output_file", type=str, default="evaluation.txt", help="Path to the file the perplexity is written to"
+#     )
+#     parser.add_argument("--no_cuda", action="store_true", help="If set to true, all computations are performed on CPU")
+#     parser.add_argument(
+#         "--save_data",
+#         action="store_true",
+#         help="If set to true, save tokens & losses",
+#     )
+#     parser.add_argument(
+#         "--test",
+#         action="store_true",
+#         help="If set to true, the script runs in test mode and only takes 10 examples per dataset",
+#     )
+#     parser.add_argument(
+#         "--max_n_examples",
+#         type=int,
+#         default=1500,
+#         help="how many examples per metadata type to evaluate",
+#     )
+#     parser.add_argument(
+#         "--metadata_to_test",
+#         type=str,
+#         default="html,entity_paragraph,website_desc,generation_datasource,timestamp,title,generation_length_text",
+#         help="metadata types to test",
+#     )
+#     parser.add_argument(
+#         "--test_aforesaid_metadata_together",
+#         action="store_true",
+#         help="If true, it will test all of designated (by --metadata_to_test) types per example at once",
+#     )
+#     parser.add_argument(
+#         "--include_chunked_examples",
+#         action="store_true",
+#         help="If true, an example longer than max_seq_len will be included with the same text chunks",
+#     )
+#     parser.add_argument("--dedupe", action="store_true", help="If true, drop duplicated text")
+#     parser.add_argument(
+#         "--untrained",
+#         action="store_true",
+#         help="If set to true, will load --untrained_model_name (default to gpt2-xl)",
+#     )
+#     parser.add_argument(
+#         "--untrained_model_name",
+#         type=str,
+#         default="gpt2-xl",
+#         help="If --untrained, will load this model and its tokenizer; mostly for --prompt",
+#     )
+#     parser.add_argument(
+#         "--prompt",
+#         action="store_true",
+#         help="If set to true, the script evaluates metadata in prompt style",
+#     )
+
+#     args = parser.parse_args()
+#     print(f"Parameters: {args}")
+
+#     # Load config
+#     if args.config_file_path:
+#         config_file_path = args.config_file_path
+#     else:
+#         try:
+#             config_file_path = hf_hub_download(
+#                 repo_id=args.repo_id, filename="actual_config.yaml", use_auth_token=True
+#             )
+#         except Exception:
+#             config_file_path = "bsmetadata/hydra_configs/v2.yaml"
+# 
+# 
+def evaluate_main(
+    metadata_to_test: str = "title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
+    output_file: str = "evaluation.txt",
+    repo_id: str = None,
+    subfolder: str = None,
+    test: bool = False,
+    max_n_examples: int = 1500,
+    prompt: bool = False,
+    no_cuda: bool = True,
+    save_data: bool = False,
+    untrained: bool = False,
+    config_file_path: str ="bsmetadata/hydra_configs/v2.yaml",
+    model = None,
+    tokenizer = None,
+    accelerator=None,
+    include_chunked_examples=True,
+    untrained_model_name="gpt2-xl",
+    dedupe=True,
+    test_aforesaid_metadata_together=True,
+) -> dict: 
+    
     repo_args = OmegaConf.load(config_file_path)
     data_config = repo_args.data_config
 
     # make sure loss (ppl) masking is on for local metadata
     data_config.metadata_config.treat_local_metadata_as_regular_text = False
 
-    # Load tokenizer
-    if args.untrained:
-        tokenizer = AutoTokenizer.from_pretrained(args.untrained_model_name)
-        tokenizer.pad_token = tokenizer.eos_token
-    else:
-        tokenizer = AutoTokenizer.from_pretrained(
-            args.repo_id,  # "bs-modeling-metadata/checkpoints_all_04_23" by default but it can change
-            subfolder="tokenizer",
-            use_auth_token=True,
-        )
 
     # Config preprocess function
     cfg = data_config.metadata_config
@@ -536,7 +555,7 @@ if __name__ == "__main__":
     cfg.metadata_list.append("entity")
     cfg.metadata_list.append("paragraph")
 
-    if args.prompt:
+    if prompt:
         cfg.metadata_sep = "; "  # Instead of " | "
         cfg.metadata_prefix_sep = ""  # Instead of " |||"; there's already an implicit " "
         DatasourceProcessor.process_global = datasource_process_global_for_prompt
@@ -549,19 +568,19 @@ if __name__ == "__main__":
         fn_add_metadata_and_chunk_examples=add_metadata_and_chunk_examples,
         tokenizer=tokenizer,
         cfg=cfg,
-        include_chunked_examples=args.include_chunked_examples,
+        include_chunked_examples=include_chunked_examples,
     )
 
     # This preserves the order of VLD_DS_IDS such that larger datasets go first
     mtdt2test_name_id_pairs = [
         (ds_id.split("_metadata_")[1], ds_id)
         for ds_id in VLD_DS_IDS
-        if ds_id.split("_metadata_")[1] in args.metadata_to_test.split(",")
+        if ds_id.split("_metadata_")[1] in metadata_to_test.split(",")
     ]
-    tknzr_id = args.untrained_model_name if args.untrained else args.repo_id
+    tknzr_id = untrained_model_name if untrained else repo_id
     tknzr_alias = f"-tknzr{cfg.max_seq_len//1024}k_" + tknzr_id.split("/")[-1]
-    deduped = "-deduped" if args.dedupe else ""
-    selection = "-plus_chunked" if args.include_chunked_examples else ""
+    deduped = "-deduped" if dedupe else ""
+    selection = "-plus_chunked" if include_chunked_examples else ""
     prefix = "bs-modeling-metadata/c4-en-htm-vld-"
     vld_ds_name_ids_dict = {
         mtdt_name: (ds_id, f"{prefix}{shorten_metadata_name(mtdt_name)}{tknzr_alias}{deduped}{selection}")
@@ -573,7 +592,7 @@ if __name__ == "__main__":
         + f"{tknzr_alias}{deduped}{selection}"
     )
 
-    if args.test_aforesaid_metadata_together:
+    if test_aforesaid_metadata_together:
         try:
             print(f"Checking existence of {augmented_merged_vld_ds_id}...")
             dataset_info(augmented_merged_vld_ds_id)
@@ -593,14 +612,14 @@ if __name__ == "__main__":
             ]
             raw_vld_ds = raw_vld_ds.remove_columns(cols_to_remove)
             print(f"Processing {raw_vld_ds}\n -> {augmented_vld_ds_id}")
-            if args.dedupe:
+            if dedupe:
                 raw_vld_ds = dedupe_raw_vld_ds(raw_vld_ds)
             augmented_vld_ds = aug_raw_vld_ds(raw_vld_ds, augmented_vld_ds_id, augment_examples_fn)
             print(f"Pushing {augmented_vld_ds}\n -> {augmented_vld_ds_id}...")
             augmented_vld_ds.push_to_hub(augmented_vld_ds_id, split="validation", private=True)
             del raw_vld_ds
             gc.collect()
-        if args.test_aforesaid_metadata_together and not is_merged and len(mtdt2test_name_id_pairs) > 1:
+        if test_aforesaid_metadata_together and not is_merged and len(mtdt2test_name_id_pairs) > 1:
             print(f"Loading {augmented_vld_ds_id},,,")
             augmented_vld_ds = load_dataset(augmented_vld_ds_id, split="validation", use_auth_token=True)
             print(augmented_vld_ds)
@@ -619,7 +638,7 @@ if __name__ == "__main__":
             del augmented_vld_ds
         gc.collect()
 
-    if args.test_aforesaid_metadata_together:
+    if test_aforesaid_metadata_together:
         if not is_merged:
             print(f"Merging {augmented_merged_vld_ds_id}...")
             left_df = augmented_vld_dfs.pop()
@@ -650,17 +669,26 @@ if __name__ == "__main__":
         merged_mtdt_names = " ⋂ ".join(vld_ds_name_ids_dict.keys())
         vld_ds_name_ids_dict[merged_mtdt_names] = ("", augmented_merged_vld_ds_id)
 
-    # Load model
-    if args.untrained:
-        print(f"Loading model {args.untrained_model_name}...")
-        model = AutoModelForCausalLM.from_pretrained(args.untrained_model_name)
-    else:
-        print(f"Loading model {args.repo_id}/{args.subfolder}...")
-        model = AutoModelForCausalLM.from_pretrained(args.repo_id, subfolder=args.subfolder, use_auth_token=True)
-    model.eval().cuda() if not args.no_cuda else model.eval()
+   
+    if model is None or tokenizer is None:
+        if untrained:
+            model = AutoModelForCausalLM.from_pretrained(repo_args.model_name)
+            tokenizer = AutoTokenizer.from_pretrained(repo_args.model_name)
+            tokenizer.pad_token = tokenizer.eos_token
+        else:
+            model = AutoModelForCausalLM.from_pretrained(repo_id, subfolder=subfolder, use_auth_token=True)
+            tokenizer = AutoTokenizer.from_pretrained(
+                "bs-modeling-metadata/checkpoints_all_04_23", subfolder="tokenizer", use_auth_token=True
+            )
+
+
+    model.eval().cuda() if not no_cuda else model.eval()
+
+
 
     torch.set_printoptions(threshold=cfg.max_seq_len)  # For debugging
 
+    results = {}
     for mtdt_name, (_, ds_id) in vld_ds_name_ids_dict.items():
         #         if mtdt_name != merged_mtdt_names:
         #             continue
@@ -672,7 +700,7 @@ if __name__ == "__main__":
 
         # Load validation dataset from hugging face
         print(f"Loading {mtdt_name}\n@ {ds_id}...")
-        n_examples = args.max_n_examples if not args.test else 10
+        n_examples = max_n_examples if not test else 10
         vld_ds = load_dataset(ds_id, use_auth_token=True, split="validation")
         vls_ds_len = len(vld_ds)
         print(f"{vls_ds_len} loaded for {mtdt_name}\n@ {ds_id}")
@@ -693,19 +721,19 @@ if __name__ == "__main__":
             metadata_example["labels"] = metadata_example["input_ids"]
             metadata_batch = default_data_collator([metadata_example])
 
-            if not args.no_cuda:
+            if not no_cuda:
                 normal_batch = {k: v.cuda() for k, v in normal_batch.items()}
                 metadata_batch = {k: v.cuda() for k, v in metadata_batch.items()}
 
             # Calculate nll (natural-log loss)
             normal_nll, normal_example_len = get_mean_loss(
                 normal_batch,
-                save_data=args.save_data,
+                save_data=save_data,
                 idx=idx,
             )
             metadata_nll, metadata_example_len = get_mean_loss(
                 metadata_batch,
-                save_data=args.save_data,
+                save_data=save_data,
                 idx=idx,
                 additional_special_token_ids=tokenizer.additional_special_tokens_ids,
             )
@@ -771,8 +799,115 @@ if __name__ == "__main__":
         final_metadata_ppl = ppl(total_metadata_nll, total_metadata_len)
 
         # Write results to output file
-        with open(args.output_file, "a", encoding="utf8") as f:
-            f.write(f"=== RESULT [{mtdt_name}{tknzr_alias}{deduped}{selection}]({example_cnt}) ===\n")
-            f.write("Perplexity (metadata): {:>6,.3f}\n".format(final_metadata_ppl))
-            f.write("Perplexity (normal):   {:>6,.3f}\n\n".format(final_normal_ppl))
+        # with open(output_file, "a", encoding="utf8") as f:
+        #     f.write(f"=== RESULT [{mtdt_name}{tknzr_alias}{deduped}{selection}]({example_cnt}) ===\n")
+        #     f.write("Perplexity (metadata): {:>6,.3f}\n".format(final_metadata_ppl))
+        #     f.write("Perplexity (normal):   {:>6,.3f}\n\n".format(final_normal_ppl))
         torch.save(data, "eva.data")
+        results[mtdt_name] = {"final_normal_ppl": final_normal_ppl, "final_metadata_ppl": final_metadata_ppl,"example_cnt": example_cnt}
+    return results
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--repo_id",
+        type=str,
+        default="bs-modeling-metadata/all_metadata_html_0.25_29_04",
+        help="Repository ID for the model to compute perplexity for",
+    )
+    parser.add_argument(
+        "--subfolder",
+        type=str,
+        default="checkpoint-30000step",
+        help="subfolder in the respository with the specific checkpoint to evaluate perplexity for",
+    )
+    parser.add_argument(
+        "--config_file_path",
+        type=str,
+        help="The path actual_config.yaml if available, otherwise repo_id/actual_config.yaml or git clone's v2.yaml",
+    )
+    parser.add_argument(
+        "--output_file",
+        type=str,
+        default="evaluation_heckpoints_all_metadata_html_0.25_29_04.txt",
+        help="Path to the file the perplexity is written to",
+    )
+    parser.add_argument("--no_cuda", action="store_true", help="If set to true, all computations are performed on CPU")
+    parser.add_argument(
+        "--save_data",
+        type=bool,
+        default=True,
+        help="If set to true, save tokens & losses",
+    )
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="If set to true, the script runs in test mode and only takes 10 examples per dataset",
+    )
+    parser.add_argument(
+        "--max_n_examples",
+        type=int,
+        default=1500,
+        help="how many examples per metadata type to evaluate",
+    )
+    parser.add_argument(
+        "--metadata_to_test",
+        type=str,
+        default="html,entity_paragraph,website_desc,generation_datasource,timestamp,title,generation_length_text",
+        help="metadata types to test",
+    )
+    parser.add_argument(
+        "--test_aforesaid_metadata_together",
+        type=bool,
+        default=True,
+        help="If true, it will test all of designated (by --metadata_to_test) types per example at once",
+    )
+    parser.add_argument(
+        "--include_chunked_examples",
+        type=bool,
+        default=True,
+        help="If true, an example longer than max_seq_len will be included with the same text chunks",
+    )
+    parser.add_argument("--dedupe", type=bool, default=True, help="If true, drop duplicated text")
+    parser.add_argument(
+        "--untrained",
+        action="store_true",
+        help="If set to true, will load --untrained_model_name (default to gpt2-xl)",
+    )
+    parser.add_argument(
+        "--untrained_model_name",
+        type=str,
+        default="gpt2-xl",
+        help="If --untrained, will load this model and its tokenizer; mostly for --prompt",
+    )
+    parser.add_argument(
+        "--prompt",
+        action="store_true",
+        help="If set to true, the script evaluates metadata in prompt style",
+    )
+
+    args = parser.parse_args()
+
+    results = evaluate_main(
+        repo_id=args.repo_id,
+        subfolder=args.subfolder,
+        config_file_path=args.config_file_path,
+        output_file=args.output_file,
+        save_data=args.save_data,
+        test=args.test,
+        max_n_examples=args.max_n_examples,
+        metadata_to_test=args.metadata_to_test,
+        untrained=args.untrained,
+        prompt=args.prompt,
+        no_cuda=args.no_cuda,
+        untrained_model_name=args.untrained_model_name,
+        include_chunked_examples=args.include_chunked_examples,
+        dedupe=args.dedupe,
+        test_aforesaid_metadata_together=args.test_aforesaid_metadata_together,
+
+    )
+    with open(args.output_file, "a", encoding="utf8") as f:
+        for k, v in results.items():
+            f.write(f"=== RESULT [{k}] ===\n")
+            f.write("Perplexity (metadata): {:>6,.3f}\n".format(v["final_metadata_ppl"]))
+            f.write("Perplexity (normal):   {:>6,.3f}\n\n".format(v["final_normal_ppl"]))

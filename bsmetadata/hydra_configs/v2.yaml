@@ -40,14 +40,22 @@ data_config:
     #- generation_length_sentence
     - generation_length_text
     - entity_paragraph
-    local_metadata_special_tokens: 
-      entity_paragraph: "entity"
-    metadata_sep: ' | '
-    metadata_key_value_sep: ': '
+    local_metadata_special_tokens:
+      entity_paragraph: "<special_entity>"
+      html: "<special_html>"
+    prefix_sep_tokens:
+      title: "<special_title>"
+      website_description: "<special_website_description>"
+      datasource: "<special_datasource>"
+      text_length: "<special_text_length>"
+      url: "<special_url>"
+    metadata_prefix_sep: '<prefix_sep>'
+    metadata_sep: ''
+    metadata_key_value_sep: ''
+    metadata_prefix_start_seq: ''
     metadata_probability: 0.5
     treat_local_metadata_as_regular_text: true
     add_local_metadata_special_tokens_in_prefix: true
-    metadata_prefix_sep: ' |||'
     metadata_prefix_start_seq: ''
     max_seq_len: 1024
     html_parser_config:
@@ -76,14 +84,14 @@ data_config:
         entity_paragraph: "<ENTITY_CHAIN>"
         html: "<HTML>"
     local_metadata_special_token_end:
-        entity_paragraph: " </ENTITY_CHAIN> "
+        entity_paragraph: "</ENTITY_CHAIN>"
         html: "</HTML>"
     local_metadata_special_token_state: true
     html_overall_sample_rate: 0.25
     without_metadata_same_context: false
   experiment: with_metadata_datasetv2_tf
-  per_device_eval_batch_size: 8
-  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 32 # 32 for 40gb
+  per_device_train_batch_size: 32
   dataset_name: bs-modeling-metadata/c4-en-html-with-training_metadata_all
   dataset_config_name: null
   train_file: c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz
@@ -96,7 +104,8 @@ data_config:
   block_size: null
   map_batch_size: 1
 weight_decay: 0.01
-learning_rate: 5e-5
+learning_rate: 0.0001
+wb_name: "all_metadata"
 num_train_epochs: 1
 max_train_steps: 100000
 lr_scheduler_type: linear
@@ -107,16 +116,16 @@ model_name: gpt2
 project_name: metadata_lm
 jobid: ''
 start_with_eval: false
-extra_steps_to_eval_save_at:
-- 2
+#extra_steps_to_eval_save_at:
+#- 2
 evaluation_strategy: STEPS
 eval_num_per_epoch: 3
-eval_steps: 2000
+eval_steps: 1000
 save_strategy: STEPS
 save_num_per_epoch: 3
-save_steps: 150
+save_steps: 500
 do_train: true
 do_eval: true
 gradient_checkpointing: true
 resume_from_checkpoint_dir: null
-gradient_accumulation_steps: 16
+gradient_accumulation_steps: 2

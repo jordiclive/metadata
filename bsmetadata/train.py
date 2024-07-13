@@ -16,11 +16,11 @@ import torch.nn.functional as F
 import wandb
 from accelerate import Accelerator
 from accelerate.utils import DistributedType, DummyOptim, DummyScheduler
+from evaluation import evaluate_main
 from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
-from torch.optim import AdamW
 from tqdm.auto import tqdm as original_tqdm
-from transformers import AddedToken, AutoConfig, AutoModelForCausalLM, AutoTokenizer, get_scheduler, set_seed
+from transformers import AdamW, AddedToken, AutoConfig, AutoModelForCausalLM, AutoTokenizer, get_scheduler, set_seed
 from transformers.trainer_utils import IntervalStrategy
 
 from bsmetadata.input_pipeline import DataConfig, get_dataloaders
@@ -34,6 +34,7 @@ class CFG:
     data_config: DataConfig = DataConfig()
     weight_decay: float = field(default=0.0, metadata={"help": "The weight decay to use for training."})
     learning_rate: float = field(default=5e-5, metadata={"help": "The initial learning rate."})
+    wb_name: str = field(default="bsmetadata", metadata={"help": "The name of the wandb project."})
     gradient_accumulation_steps: int = field(
         default=1,
         metadata={"help": "The number of gradient accumulation steps to perform before updating model parameters."},
@@ -217,8 +218,8 @@ def main(args: CFG) -> None:
     is_local_main_process = accelerator.is_local_main_process
     tqdm = partial(original_tqdm, disable=not is_local_main_process, position=0)
     use_deepspeed = accelerator.state.deepspeed_plugin is not None
-    use_deepspeed_optimzer = use_deepspeed and "optimizer" in accelerator.state.deepspeed_plugin.deepspeed_config
-    use_deepspeed_scheduler = use_deepspeed and "scheduler" in accelerator.state.deepspeed_plugin.deepspeed_config
+    use_deepspeed_optimzer = use_deepspeed or "optimizer" in accelerator.state.deepspeed_plugin.deepspeed_config
+    use_deepspeed_scheduler = use_deepspeed or "scheduler" in accelerator.state.deepspeed_plugin.deepspeed_config
 
     if accelerator.distributed_type == DistributedType.DEEPSPEED and not use_deepspeed_scheduler:
         assert False, "Please set scheduler in DeepSpeed config file otherwise it may not be checkpointed properly"
@@ -241,6 +242,10 @@ def main(args: CFG) -> None:
                 )
             )
         )
+
+        new_tokens.append(args.data_config.metadata_config.metadata_prefix_sep)
+        new_tokens.extend(args.data_config.metadata_config.prefix_sep_tokens.values())
+        new_tokens.extend(args.data_config.metadata_config.local_metadata_special_tokens.values())
         new_tokens = [
             AddedToken(token, rstrip=False, lstrip=False, single_word=False, normalized=False) for token in new_tokens
         ]
@@ -294,7 +299,13 @@ def main(args: CFG) -> None:
             gpu_id=accelerator.process_index,
         )
         dummy_dataloader = get_dummy_dataloader(args.data_config.per_device_train_batch_size)
-        eval_dataloaders = dict()
+        eval_dataloader, format_fn_eval = get_dataloader(
+            tokenizer=tokenizer,
+            args=args.data_config,
+            num_gpus=accelerator.num_processes,
+            gpu_id=accelerator.process_index,
+            train=False,
+        )
         model, optimizer, dummy_dataloader, scheduler = accelerator.prepare(
             model, optimizer, dummy_dataloader, scheduler
         )
@@ -348,7 +359,7 @@ def main(args: CFG) -> None:
         save_per_n_step = args.max_train_steps + 1  # will never eval
 
     @torch.no_grad()
-    def evaluate(eval_dataloader):
+    def evaluate(eval_dataloader, only_first_n_steps=120):
         model.eval()
         losses = []
         for step, batch in enumerate(tqdm(eval_dataloader, desc="eval")):  # , leave=False)
@@ -359,7 +370,8 @@ def main(args: CFG) -> None:
             loss = loss_fn(batch, outputs, metadata_mask)
 
             losses.append(accelerator.gather(loss.repeat(args.data_config.per_device_eval_batch_size)))
-
+            if step == only_first_n_steps:
+                break
         model.train()
         if not losses:
             # in case the dataloader is empty
@@ -368,23 +380,39 @@ def main(args: CFG) -> None:
         perplexity = math.exp(torch.mean(losses))
         return {"perplexity": perplexity}
 
-    def evaluate_multiple_dateloaders(eval_dataloaders):
-        for key, eval_dataloader in eval_dataloaders.items():
-            logger.info(f"Evaluating split {key}")
-            metrics = evaluate(eval_dataloader)
-            metrics_logger.log({key: metrics})
+    def evaluate_multiple_dateloaders(eval_dataloaders, use_full_evaluation_for_val):
+        if use_full_evaluation_for_val:
+            results = evaluate_main(
+                output_file="eval.txt",
+                # metadata_to_test="entity_paragraph",
+                metadata_to_test="title,html,entity_paragraph,website_desc,generation_datasource,timestamp,generation_length_text",
+                model=model,
+                tokenizer=tokenizer,
+                accelerator=accelerator,
+            )
+            model.train()
+            for k, v in results.items():
+                metrics_logger.log({k: v})
+        else:
+            for key, eval_dataloader in eval_dataloaders.items():
+                logger.info(f"Evaluating split {key}")
+                metrics = evaluate(eval_dataloader)
+                metrics_logger.log({key: metrics})
         logger.info("Evaluation finished")
 
     if not args.do_train and not args.do_eval:
         return
 
     progress_bar = tqdm(range(args.max_train_steps), desc="training", initial=train_state.completed_steps)
-    metrics_logger = Logger(is_local_main_process, project=args.project_name, config=config_dict)
+    t_bs = args.data_config.per_device_train_batch_size * args.gradient_accumulation_steps * 8
+    os.environ['WANDB_API_KEY'] = 'd8216641d549f9bb3d0c5074baa39e15dfd55030'
+    metrics_logger = Logger(is_local_main_process, name=f"{args.wb_name}-{args.learning_rate}-{t_bs}",
+                            entity='jordanclive', project='metadata', config=config_dict)
 
     do_eval = args.do_eval and args.start_with_eval
     if do_eval:
         logger.info("Start with an evaluation")
-        evaluate_multiple_dateloaders(eval_dataloaders)
+        evaluate_multiple_dateloaders(eval_dataloaders, use_full_evaluation_for_val=True)
 
     if not args.do_train:
         return
@@ -406,7 +434,7 @@ def main(args: CFG) -> None:
             model.save_checkpoint(path)
         else:
             accelerator.save_state(path)
-        save_model_and_tokenizer(accelerator, model, path)
+        save_model_and_tokenizer(accelerator, model, path, tokenizer=tokenizer)
         if is_local_main_process:
             train_state.save(path / "train_state.json")
 
@@ -425,6 +453,17 @@ def main(args: CFG) -> None:
                 if args.data_config.experiment == "with_metadata_datasetv2_tf":
                     batch = {k: v.to(accelerator.device) for k, v in batch.items()}
                 yield batch
+
+    def get_eval_data_iter():
+        while True:
+            for batch in eval_dataloader:
+                batch = format_fn_eval(batch)
+                if args.data_config.experiment == "with_metadata_datasetv2_tf":
+                    batch = {k: v.to(accelerator.device) for k, v in batch.items()}
+                yield batch
+
+    eval_iter = get_eval_data_iter()
+    eval_dataloaders = {"validation": eval_iter}
 
     data_iter = get_data_iter()
 
@@ -461,11 +500,18 @@ def main(args: CFG) -> None:
                 optimizer.zero_grad()
 
             step_loss_gathered = accelerator.gather(step_loss).mean().item()
-            metrics = {
-                "loss": step_loss_gathered,
-                "lr": max(scheduler.get_lr()),
-                "gradient_step": train_state.completed_steps,
-            }
+            if step < 20:
+                metrics = {
+                    "loss": step_loss_gathered,
+                    "lr": 0,
+                    "gradient_step": train_state.completed_steps,
+                }
+            else:
+                metrics = {
+                    "loss": step_loss_gathered,
+                    "lr": max(scheduler.get_last_lr()),
+                    "gradient_step": train_state.completed_steps,
+                }
             if not args.data_config.streaming:
                 metrics["epoch"] = step / len(train_dataloader)
 
@@ -488,7 +534,7 @@ def main(args: CFG) -> None:
             path = Path(args.out_dir).resolve() / f"checkpoint-{completed_steps}step"
             save(path)
         if do_eval:
-            evaluate_multiple_dateloaders(eval_dataloaders)
+            evaluate_multiple_dateloaders(eval_dataloaders, use_full_evaluation_for_val=True)
 
         if completed_steps >= args.max_train_steps:
             # finished = True
