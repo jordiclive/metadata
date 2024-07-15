@@ -56,7 +56,7 @@ data_config:
     metadata_probability: 0.5
     treat_local_metadata_as_regular_text: true
     add_local_metadata_special_tokens_in_prefix: true
-    max_seq_len: 2048
+    max_seq_len: 1024
     html_parser_config:
       all_tags_rules:
         attributes_to_keep:

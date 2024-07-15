@@ -54,11 +54,20 @@ class AllTagsRules:
 
 @dataclass
 class Pre:
-    title = "<special_title>"
-    website_description = "<special_website_description>"
-    datasource = "<special_datasource>"
-    text_length = "<special_text_length>"
-    url = "<special_url>"
+    title: str = "<special_title>"
+    website_description: str = "<special_website_description>"
+    datasource: str = "<special_datasource>"
+    text_length: str = "<special_text_length>"
+    url: str = "<special_url>"
+
+    def keys(self):
+        return ["title", "website_description", "datasource", "text_length", "url"]
+
+    def values(self):
+        return [self.title, self.website_description, self.datasource, self.text_length, self.url]
+
+    def items(self):
+        return [(key, value) for key, value in zip(self.keys(), self.values())]
 
 
 @dataclass
@@ -362,7 +371,7 @@ class UrlProcessor(MetadataProcessor):
         # We represent a URL with unquoted format such that less confusion for a tokenizer.
         # Example: "foo.bar/Year 2021/" instead of "foo.bar/Year%202021/".
         return "".join(
-            [self.cfg.prefix_sep_tokens["url"], self.cfg.metadata_key_value_sep, unquote_plus(metadata_attrs["value"])]
+            [self.cfg.prefix_sep_tokens.url, self.cfg.metadata_key_value_sep, unquote_plus(metadata_attrs["value"])]
         )
 
 
@@ -372,7 +381,7 @@ class TitleProcessor(MetadataProcessor):
     def process_global(self, metadata_attrs: Dict[str, Any]) -> Optional[str]:
         # We represent a title by the title of the corresponding webpage content.
         # Example: "My Thoughts On It » Dad, I want to be an inventor".
-        return "".join([self.cfg.prefix_sep_tokens["title"], self.cfg.metadata_key_value_sep, metadata_attrs["value"]])
+        return "".join([self.cfg.prefix_sep_tokens.title, self.cfg.metadata_key_value_sep, metadata_attrs["value"]])
 
 
 class WebsiteDescriptionProcessor(MetadataProcessor):
@@ -382,7 +391,7 @@ class WebsiteDescriptionProcessor(MetadataProcessor):
         # Example: "website_description: BBC is a news organization".
         return "".join(
             [
-                self.cfg.prefix_sep_tokens["website_description"],
+                self.cfg.prefix_sep_tokens.website_description,
                 self.cfg.metadata_key_value_sep,
                 metadata_attrs["value"],
             ]
@@ -397,7 +406,7 @@ class DatasourceProcessor(MetadataProcessor):
         # URL: http://www.example.de/2015/forum/article/21-new-project
         # Example: example.de > forum > article > new project
         return "".join(
-            [self.cfg.prefix_sep_tokens["datasource"], self.cfg.metadata_key_value_sep, metadata_attrs["value"]]
+            [self.cfg.prefix_sep_tokens.datasource, self.cfg.metadata_key_value_sep, metadata_attrs["value"]]
         )
 
 
@@ -409,7 +418,7 @@ class GenerationLengthProcessor(MetadataProcessor):
         # Example: Length: 123
 
         return "".join(
-            [self.cfg.prefix_sep_tokens["text_length"], self.cfg.metadata_key_value_sep, metadata_attrs["value"]]
+            [self.cfg.prefix_sep_tokens.text_length, self.cfg.metadata_key_value_sep, metadata_attrs["value"]]
         )
 
 
