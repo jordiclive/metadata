@@ -671,9 +671,18 @@ def evaluate_main(
 
     if model is None:
         if untrained:
-            model = AutoModelForCausalLM.from_pretrained(repo_args.model_name)
+            model = AutoModelForCausalLM.from_pretrained(
+                repo_args.model_name, torch_dtype=torch.float16, attn_implementation="flash_attention_2"
+            )
+
         else:
-            model = AutoModelForCausalLM.from_pretrained(repo_id, subfolder=subfolder, use_auth_token=True)
+            model = AutoModelForCausalLM.from_pretrained(
+                repo_id,
+                subfolder=subfolder,
+                use_auth_token=True,
+                torch_dtype=torch.float16,
+                attn_implementation="flash_attention_2",
+            )
 
     if tokenizer is None:
         if untrained:

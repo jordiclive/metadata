@@ -230,7 +230,9 @@ def main(args: CFG) -> None:
     config.gradient_checkpointing = args.gradient_checkpointing
     config.use_cache = not args.gradient_checkpointing  # to disable warning
     # get model
-    model = AutoModelForCausalLM.from_pretrained(args.model_name, config=config)
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model_name, config=config, torch_dtype=torch.float16, attn_implementation="flash_attention_2"
+    )
 
     if args.data_config.metadata_config.local_metadata_special_token_state:
         new_tokens = list(

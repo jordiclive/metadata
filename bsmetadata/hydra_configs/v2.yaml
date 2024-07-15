@@ -89,8 +89,8 @@ data_config:
     html_overall_sample_rate: 0.25
     without_metadata_same_context: false
   experiment: with_metadata_datasetv2_tf
-  per_device_eval_batch_size: 32 # 32 for 40gb
-  per_device_train_batch_size: 32
+  per_device_eval_batch_size: 4 # 32 for 40gb
+  per_device_train_batch_size: 4
   dataset_name: bs-modeling-metadata/c4-en-html-with-training_metadata_all
   dataset_config_name: null
   train_file: c4-en-html_cc-main-2019-18_pq00-000.jsonl.gz
