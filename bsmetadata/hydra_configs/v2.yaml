@@ -1,6 +1,6 @@
 data_config:
   streaming: True
-  validation_size_max: 1024
+  validation_size_max: 2048
   metadata_config:
     # prefix_sep_tokens:
     #   title: "<special_title>"
@@ -56,7 +56,7 @@ data_config:
     metadata_probability: 0.5
     treat_local_metadata_as_regular_text: true
     add_local_metadata_special_tokens_in_prefix: true
-    max_seq_len: 1024
+    max_seq_len: 2048
     html_parser_config:
       all_tags_rules:
         attributes_to_keep:
@@ -119,12 +119,12 @@ start_with_eval: false
 #- 2
 evaluation_strategy: STEPS
 eval_num_per_epoch: 3
-eval_steps: 1000
+eval_steps: 3
 save_strategy: STEPS
 save_num_per_epoch: 3
-save_steps: 500
+save_steps: 1000
 do_train: true
 do_eval: true
 gradient_checkpointing: true
-resume_from_checkpoint_dir: null
+# resume_from_checkpoint_dir: "/home/jordan/MRs/metadata/output_folder/checkpoint-60step/"
 # gradient_accumulation_steps: 2

@@ -451,7 +451,7 @@ def load_dataset_by_files(files, streaming=False):
         dataset = concatenate_datasets([d for d, _ in datasets])
     else:
         sizes = [n for _, n in datasets]
-        datasets = [d.shuffle(seed=42, buffer_size=1024) for d, n in datasets]
+        datasets = [d.shuffle(seed=42, buffer_size=2048) for d, n in datasets]
         if len(datasets) == 1:
             return datasets[0]
         probabilities = [n / sum(sizes) for n in sizes]

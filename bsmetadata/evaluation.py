@@ -4,6 +4,7 @@ import functools
 import gc
 import itertools
 import os
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import rich
@@ -521,6 +522,55 @@ def shorten_metadata_name(orig_name):
 #             config_file_path = "bsmetadata/hydra_configs/v2.yaml"
 #
 #
+
+
+import os
+
+from datasets import load_from_disk
+
+
+def dataset_info_local(dataset_id, output_folder="/home/jordan/MRs/metadata/output_data"):
+    """Check for dataset existence in the local output folder and provide basic info if present."""
+    dataset_path = os.path.join(output_folder, dataset_id)
+    if not os.listdir(dataset_path) or not os.path.exists(dataset_path):
+        return False
+    else:
+        return True
+
+
+def load_local_data(dataset_id, output_folder="/home/jordan/MRs/metadata/output_data"):
+    """Load the dataset from the local output folder."""
+    dataset_path = os.path.join(output_folder, dataset_id)
+    dataset = load_from_disk(dataset_path)
+    print(f"Dataset loaded from {dataset_path}")
+    return dataset
+
+
+def save_dataset_locally(dataset, dataset_id, output_folder="/home/jordan/MRs/metadata/output_data"):
+    """Save the dataset to the local output folder."""
+    dataset_path = os.path.join(output_folder, dataset_id)
+    dataset.save_to_disk(dataset_path)
+    print(f"Dataset saved locally at {dataset_path}")
+
+
+@dataclass
+class Pre:
+    title: str = "<special_title>"
+    website_description: str = "<special_website_description>"
+    datasource: str = "<special_datasource>"
+    text_length: str = "<special_text_length>"
+    url: str = "<special_url>"
+
+    def keys(self):
+        return ["title", "website_description", "datasource", "text_length", "url"]
+
+    def values(self):
+        return [self.title, self.website_description, self.datasource, self.text_length, self.url]
+
+    def items(self):
+        return [(key, value) for key, value in zip(self.keys(), self.values())]
+
+
 def evaluate_main(
     metadata_to_test: str = "title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
     output_file: str = "evaluation.txt",
@@ -532,7 +582,7 @@ def evaluate_main(
     no_cuda: bool = True,
     save_data: bool = False,
     untrained: bool = False,
-    config_file_path: str = "bsmetadata/hydra_configs/v2.yaml",
+    config_file_path: str = "/home/jordan/MRs/metadata/bsmetadata/hydra_configs/v2.yaml",
     model=None,
     tokenizer=None,
     accelerator=None,
@@ -554,7 +604,7 @@ def evaluate_main(
     cfg.entity_setting = "beg"
     cfg.metadata_list.append("entity")
     cfg.metadata_list.append("paragraph")
-
+    cfg.prefix_sep_tokens = Pre()
     if prompt:
         cfg.metadata_sep = "; "  # Instead of " | "
         cfg.metadata_prefix_sep = ""  # Instead of " |||"; there's already an implicit " "
@@ -577,7 +627,7 @@ def evaluate_main(
         for ds_id in VLD_DS_IDS
         if ds_id.split("_metadata_")[1] in metadata_to_test.split(",")
     ]
-    tknzr_id = untrained_model_name if untrained else repo_id
+    tknzr_id = "gemma"  # untrained_model_name if untrained else repo_id
     tknzr_alias = f"-tknzr{cfg.max_seq_len//1024}k_" + tknzr_id.split("/")[-1]
     deduped = "-deduped" if dedupe else ""
     selection = "-plus_chunked" if include_chunked_examples else ""
@@ -595,7 +645,7 @@ def evaluate_main(
     if test_aforesaid_metadata_together:
         try:
             print(f"Checking existence of {augmented_merged_vld_ds_id}...")
-            dataset_info(augmented_merged_vld_ds_id)
+            dataset_info_local(augmented_merged_vld_ds_id)
             is_merged = True
         except Exception:
             is_merged = False
@@ -604,9 +654,14 @@ def evaluate_main(
     for mtdt_name, (raw_vld_ds_id, augmented_vld_ds_id) in vld_ds_name_ids_dict.items():
         try:
             print(f"Checking existence of {augmented_vld_ds_id}...")
-            dataset_info(augmented_vld_ds_id)
+            dataset_info_local(
+                augmented_vld_ds_id,
+            )
         except Exception:
-            raw_vld_ds = load_dataset(raw_vld_ds_id, split="validation", use_auth_token=True)
+            try:
+                raw_vld_ds = load_local_data(raw_vld_ds_id)
+            except:
+                raw_vld_ds = load_dataset(raw_vld_ds_id, use_auth_token=True, split="validation")
             cols_to_remove = [
                 col for col in raw_vld_ds.column_names if col != "text" and not col.startswith("metadata_")
             ]
@@ -616,12 +671,13 @@ def evaluate_main(
                 raw_vld_ds = dedupe_raw_vld_ds(raw_vld_ds)
             augmented_vld_ds = aug_raw_vld_ds(raw_vld_ds, augmented_vld_ds_id, augment_examples_fn)
             print(f"Pushing {augmented_vld_ds}\n -> {augmented_vld_ds_id}...")
-            augmented_vld_ds.push_to_hub(augmented_vld_ds_id, split="validation", private=True)
+            save_dataset_locally(augmented_vld_ds, augmented_vld_ds_id)
+            # augmented_vld_ds.push_to_hub(augmented_vld_ds_id, split="validation", private=True)
             del raw_vld_ds
             gc.collect()
         if test_aforesaid_metadata_together and not is_merged and len(mtdt2test_name_id_pairs) > 1:
             print(f"Loading {augmented_vld_ds_id},,,")
-            augmented_vld_ds = load_dataset(augmented_vld_ds_id, split="validation", use_auth_token=True)
+            augmented_vld_ds = load_local_data(augmented_vld_ds_id)
             print(augmented_vld_ds)
 
             print(f"Converting {augmented_vld_ds_id} to Pandas for merging...")
@@ -663,7 +719,8 @@ def evaluate_main(
             del raw_vld_ds
 
             print(f"Pushing {augmented_merged_vld_ds}\n -> {augmented_vld_ds_id}...")
-            augmented_merged_vld_ds.push_to_hub(augmented_merged_vld_ds_id, split="validation", private=True)
+            save_dataset_locally(augmented_merged_vld_ds, augmented_merged_vld_ds_id)
+            # augmented_merged_vld_ds.push_to_hub(augmented_merged_vld_ds_id, split="validation", private=True)
             del augmented_merged_vld_ds
             gc.collect()
         merged_mtdt_names = " ⋂ ".join(vld_ds_name_ids_dict.keys())
@@ -696,6 +753,8 @@ def evaluate_main(
     torch.set_printoptions(threshold=cfg.max_seq_len)  # For debugging
 
     results = {}
+    print("VLD_DS_NAME_IDS_DICT")
+    print(vld_ds_name_ids_dict)
     for mtdt_name, (_, ds_id) in vld_ds_name_ids_dict.items():
         #         if mtdt_name != merged_mtdt_names:
         #             continue
