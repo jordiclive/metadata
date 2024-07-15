@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# source /home/jordan/miniconda3/envs/jordan_metadata_312/bin/activate
-# conda activate jordan_metadata_312
-source /home/jordan/miniconda3/envs/jordan_metadata_dev/bin/activate
-conda activate jordan_metadata_dev
+source /home/jordan/miniconda3/envs/jordan_metadata_312/bin/activate
+conda activate jordan_metadata_312
+# source /home/jordan/miniconda3/envs/jordan_metadata_dev/bin/activate
+# conda activate jordan_metadata_dev
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CONDA_PREFIX/lib/
 # export TRANSFORMERS_CACHE=/fsx/home-jordiclive/transformers_cache

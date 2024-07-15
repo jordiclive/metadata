@@ -74,7 +74,7 @@ class Pre:
 class HTMLParserConfig:
     """A class to store all hyperparameters for adding or not adding html metadata"""
 
-    all_tags_rules: AllTagsRules = AllTagsRules()
+    all_tags_rules: AllTagsRules = field(default_factory=AllTagsRules)
     tags_to_remove_alone_tag_name: List[str] = field(
         default_factory=(lambda: []),
         metadata={
@@ -93,6 +93,31 @@ class HTMLParserConfig:
         default_factory=(lambda: []),
         metadata={"help": "Corresponding text length upper bound."},
     )
+
+
+class HTMLParserConfigDefault(HTMLParserConfig):
+    all_tags_rules = AllTagsRules(
+        attributes_to_keep=None,
+        txt_max_chr_len=-float("inf"),
+        txt_min_chr_len=-float("inf"),
+        tags_exceptions_to_txt_max_min_chr_len=[],
+    )
+    tags_to_remove_alone_tag_name = []
+    tags_to_remove_alone_txt_max_chr_len = []
+    tags_to_remove_alone_txt_min_chr_len = []
+
+
+# html_parser = HTMLParserConfig(
+#     AllTagsRules(
+#         attributes_to_keep=None,
+#         txt_max_chr_len=-float("inf"),
+#         txt_min_chr_len=-float("inf"),
+#         tags_exceptions_to_txt_max_min_chr_len=[],
+#     ),
+#     tags_to_remove_alone_tag_name=[],
+#     tags_to_remove_alone_txt_max_chr_len=[],
+#     tags_to_remove_alone_txt_min_chr_len=[],
+# )
 
 
 @dataclass
@@ -165,7 +190,7 @@ class MetadataConfig:
             "special tokens (if `add_local_metadata_special_tokens_in_prefix` is `True`) from the actual text."
         },
     )
-    prefix_sep_tokens: Optional[Pre] = Pre()
+    prefix_sep_tokens: Optional[Pre] = field(default_factory=Pre)
     metadata_prefix_start_seq: str = field(
         default="",
         metadata={"help": "The character sequence to be concatenated at the beginning of the metadata prefix."},
@@ -205,17 +230,7 @@ class MetadataConfig:
     max_seq_len: int = field(
         default=512, metadata={"help": "The maximum number of tokens to use for each training chunk."}
     )
-    html_parser_config: Optional[HTMLParserConfig] = HTMLParserConfig(
-        AllTagsRules(
-            attributes_to_keep=None,
-            txt_max_chr_len=-float("inf"),
-            txt_min_chr_len=-float("inf"),
-            tags_exceptions_to_txt_max_min_chr_len=[],
-        ),
-        tags_to_remove_alone_tag_name=[],
-        tags_to_remove_alone_txt_max_chr_len=[],
-        tags_to_remove_alone_txt_min_chr_len=[],
-    )
+    html_parser_config: Optional[HTMLParserConfig] = field(default_factory=HTMLParserConfigDefault)
 
 
 class MetadataProcessor:
