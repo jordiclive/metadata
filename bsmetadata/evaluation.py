@@ -64,7 +64,7 @@ def mean_loss_fn(
     save_data: bool = False,
     idx: int = None,
     additional_special_token_ids: List[int] = None,
-    tokenizer = None,
+    tokenizer=None,
 ) -> torch.Tensor:
     """Calculates the perplexity for a given batch.
 
@@ -206,7 +206,7 @@ def get_mean_loss(
     idx: int = None,
     additional_special_token_ids: List[int] = None,
     model=None,
-    tokenizer = None,
+    tokenizer=None,
 ) -> torch.Tensor:
     """Prepares the arguments for perplexity calculation and passes them to the perplexity function.
 
@@ -508,6 +508,7 @@ def shorten_metadata_name(orig_name):
 #     args = parser.parse_args()
 #     print(f"Parameters: {args}")
 
+
 #     # Load config
 #     if args.config_file_path:
 #         config_file_path = args.config_file_path
@@ -518,8 +519,8 @@ def shorten_metadata_name(orig_name):
 #             )
 #         except Exception:
 #             config_file_path = "bsmetadata/hydra_configs/v2.yaml"
-# 
-# 
+#
+#
 def evaluate_main(
     metadata_to_test: str = "title,html,entity_paragraph,website_desc,generation_datasource,timestamp",
     output_file: str = "evaluation.txt",
@@ -531,22 +532,21 @@ def evaluate_main(
     no_cuda: bool = True,
     save_data: bool = False,
     untrained: bool = False,
-    config_file_path: str ="bsmetadata/hydra_configs/v2.yaml",
-    model = None,
-    tokenizer = None,
+    config_file_path: str = "bsmetadata/hydra_configs/v2.yaml",
+    model=None,
+    tokenizer=None,
     accelerator=None,
     include_chunked_examples=True,
     untrained_model_name="gpt2-xl",
     dedupe=True,
     test_aforesaid_metadata_together=True,
-) -> dict: 
-    
+) -> dict:
+
     repo_args = OmegaConf.load(config_file_path)
     data_config = repo_args.data_config
 
     # make sure loss (ppl) masking is on for local metadata
     data_config.metadata_config.treat_local_metadata_as_regular_text = False
-
 
     # Config preprocess function
     cfg = data_config.metadata_config
@@ -669,22 +669,20 @@ def evaluate_main(
         merged_mtdt_names = " ⋂ ".join(vld_ds_name_ids_dict.keys())
         vld_ds_name_ids_dict[merged_mtdt_names] = ("", augmented_merged_vld_ds_id)
 
-   
-    if model is None or tokenizer is None:
+    if model is None:
         if untrained:
             model = AutoModelForCausalLM.from_pretrained(repo_args.model_name)
+        else:
+            model = AutoModelForCausalLM.from_pretrained(repo_id, subfolder=subfolder, use_auth_token=True)
+
+    if tokenizer is None:
+        if untrained:
             tokenizer = AutoTokenizer.from_pretrained(repo_args.model_name)
             tokenizer.pad_token = tokenizer.eos_token
         else:
-            model = AutoModelForCausalLM.from_pretrained(repo_id, subfolder=subfolder, use_auth_token=True)
-            tokenizer = AutoTokenizer.from_pretrained(
-                "bs-modeling-metadata/checkpoints_all_04_23", subfolder="tokenizer", use_auth_token=True
-            )
-
+            raise ValueError("tokenizer must be provided if model is provided")
 
     model.eval().cuda() if not no_cuda else model.eval()
-
-
 
     torch.set_printoptions(threshold=cfg.max_seq_len)  # For debugging
 
@@ -804,8 +802,13 @@ def evaluate_main(
         #     f.write("Perplexity (metadata): {:>6,.3f}\n".format(final_metadata_ppl))
         #     f.write("Perplexity (normal):   {:>6,.3f}\n\n".format(final_normal_ppl))
         torch.save(data, "eva.data")
-        results[mtdt_name] = {"final_normal_ppl": final_normal_ppl, "final_metadata_ppl": final_metadata_ppl,"example_cnt": example_cnt}
+        results[mtdt_name] = {
+            "final_normal_ppl": final_normal_ppl,
+            "final_metadata_ppl": final_metadata_ppl,
+            "example_cnt": example_cnt,
+        }
     return results
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -904,7 +907,6 @@ if __name__ == "__main__":
         include_chunked_examples=args.include_chunked_examples,
         dedupe=args.dedupe,
         test_aforesaid_metadata_together=args.test_aforesaid_metadata_together,
-
     )
     with open(args.output_file, "a", encoding="utf8") as f:
         for k, v in results.items():
