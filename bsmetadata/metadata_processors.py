@@ -53,6 +53,15 @@ class AllTagsRules:
 
 
 @dataclass
+class Pre:
+    title = "<special_title>"
+    website_description = "<special_website_description>"
+    datasource = "<special_datasource>"
+    text_length = "<special_text_length>"
+    url = "<special_url>"
+
+
+@dataclass
 class HTMLParserConfig:
     """A class to store all hyperparameters for adding or not adding html metadata"""
 
@@ -147,6 +156,7 @@ class MetadataConfig:
             "special tokens (if `add_local_metadata_special_tokens_in_prefix` is `True`) from the actual text."
         },
     )
+    prefix_sep_tokens: Optional[Pre] = Pre()
     metadata_prefix_start_seq: str = field(
         default="",
         metadata={"help": "The character sequence to be concatenated at the beginning of the metadata prefix."},

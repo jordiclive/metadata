@@ -2,6 +2,12 @@ data_config:
   streaming: True
   validation_size_max: 1024
   metadata_config:
+    # prefix_sep_tokens:
+    #   title: "<special_title>"
+    #   website_description: "<special_website_description>"
+    #   datasource: "<special_datasource>"
+    #   text_length: "<special_text_length>"
+    #   url: "<special_url>"
     random_sample_metadata: true
     random_sample_metadata_calculate_size: 16384
     random_sample_metadata_weights:
@@ -43,12 +49,6 @@ data_config:
     local_metadata_special_tokens:
       entity_paragraph: "<special_entity>"
       html: "<special_html>"
-    prefix_sep_tokens:
-      title: "<special_title>"
-      website_description: "<special_website_description>"
-      datasource: "<special_datasource>"
-      text_length: "<special_text_length>"
-      url: "<special_url>"
     metadata_prefix_sep: '<prefix_sep>'
     metadata_sep: ''
     metadata_key_value_sep: ''
@@ -56,8 +56,7 @@ data_config:
     metadata_probability: 0.5
     treat_local_metadata_as_regular_text: true
     add_local_metadata_special_tokens_in_prefix: true
-    metadata_prefix_start_seq: ''
-    max_seq_len: 1024
+    max_seq_len: 2048
     html_parser_config:
       all_tags_rules:
         attributes_to_keep:
@@ -128,4 +127,4 @@ do_train: true
 do_eval: true
 gradient_checkpointing: true
 resume_from_checkpoint_dir: null
-gradient_accumulation_steps: 2
+# gradient_accumulation_steps: 2
