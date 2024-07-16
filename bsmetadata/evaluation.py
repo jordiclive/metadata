@@ -405,7 +405,7 @@ def aug_raw_vld_ds(raw_vld_ds, augmented_vld_ds_id, augment_examples_fn):
         remove_columns=raw_vld_ds.column_names,
         batched=True,
         batch_size=64,
-        num_proc=len(os.sched_getaffinity(0)),
+        num_proc=len(os.sched_getaffinity(0)) // 2,
     )
     print(f"#rows: {len(raw_vld_ds)} -> {len(augmented_vld_ds)}")
     return augmented_vld_ds
@@ -543,6 +543,9 @@ from datasets import load_from_disk
 def dataset_info_local(dataset_id, output_folder="/home/jordan/MRs/metadata/output_data"):
     """Check for dataset existence in the local output folder and provide basic info if present."""
     dataset_path = os.path.join(output_folder, dataset_id)
+    if os.path.exists(dataset_path):
+        if os.listdir(dataset_path):
+            return True
     if not os.path.exists(dataset_path) or os.listdir(dataset_path):
         raise ValueError(f"Dataset {dataset_id} not found in {output_folder}")
     else:
@@ -659,6 +662,7 @@ def evaluate_main(
         try:
             print(f"Checking existence of {augmented_merged_vld_ds_id}...")
             dataset_info_local(augmented_merged_vld_ds_id)
+            print("IS THERE")
             is_merged = True
         except Exception:
             is_merged = False
@@ -677,6 +681,8 @@ def evaluate_main(
             dataset_info_local(
                 augmented_vld_ds_id,
             )
+            print("IT IS THERE")
+
         except Exception:
             try:
                 logger.info(f"LOADING !!!!! {raw_vld_ds_id}...")
