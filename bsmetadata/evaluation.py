@@ -12,6 +12,7 @@ import torch
 import torch.nn.functional as F
 from datasets import Dataset, load_dataset
 from huggingface_hub import dataset_info, hf_hub_download
+from loguru import logger
 from omegaconf import OmegaConf
 from rich.text import Text
 from tqdm.auto import tqdm
@@ -532,7 +533,7 @@ from datasets import load_from_disk
 def dataset_info_local(dataset_id, output_folder="/home/jordan/MRs/metadata/output_data"):
     """Check for dataset existence in the local output folder and provide basic info if present."""
     dataset_path = os.path.join(output_folder, dataset_id)
-    if not os.listdir(dataset_path) or not os.path.exists(dataset_path):
+    if not os.path.exists(dataset_path) or os.listdir(dataset_path):
         return False
     else:
         return True
@@ -541,6 +542,8 @@ def dataset_info_local(dataset_id, output_folder="/home/jordan/MRs/metadata/outp
 def load_local_data(dataset_id, output_folder="/home/jordan/MRs/metadata/output_data"):
     """Load the dataset from the local output folder."""
     dataset_path = os.path.join(output_folder, dataset_id)
+    print(f"Loading dataset from {dataset_path}")
+    logger.info(f"Loading dataset from {dataset_path}")
     dataset = load_from_disk(dataset_path)
     print(f"Dataset loaded from {dataset_path}")
     return dataset
@@ -659,9 +662,12 @@ def evaluate_main(
             )
         except Exception:
             try:
-                raw_vld_ds = load_local_data(raw_vld_ds_id)
+                raw_vld_ds = load_local_data(raw_vld_ds.split("/")[1])
             except:
-                raw_vld_ds = load_dataset(raw_vld_ds_id, use_auth_token=True, split="validation")
+                try:
+                    raw_vld_ds = load_local_data(raw_vld_ds)
+                except:
+                    raw_vld_ds = load_dataset(raw_vld_ds_id, use_auth_token=True, split="validation")
             cols_to_remove = [
                 col for col in raw_vld_ds.column_names if col != "text" and not col.startswith("metadata_")
             ]
@@ -726,27 +732,27 @@ def evaluate_main(
         merged_mtdt_names = " ⋂ ".join(vld_ds_name_ids_dict.keys())
         vld_ds_name_ids_dict[merged_mtdt_names] = ("", augmented_merged_vld_ds_id)
 
-    if model is None:
-        if untrained:
-            model = AutoModelForCausalLM.from_pretrained(
-                repo_args.model_name, torch_dtype=torch.float16, attn_implementation="flash_attention_2"
-            )
+    # if model is None:
+    #     if untrained:
+    #         model = AutoModelForCausalLM.from_pretrained(
+    #             repo_args.model_name, torch_dtype=torch.float16, attn_implementation="flash_attention_2"
+    #         )
 
-        else:
-            model = AutoModelForCausalLM.from_pretrained(
-                repo_id,
-                subfolder=subfolder,
-                use_auth_token=True,
-                torch_dtype=torch.float16,
-                attn_implementation="flash_attention_2",
-            )
+    #     else:
+    #         model = AutoModelForCausalLM.from_pretrained(
+    #             repo_id,
+    #             subfolder=subfolder,
+    #             use_auth_token=True,
+    #             torch_dtype=torch.float16,
+    #             attn_implementation="flash_attention_2",
+    #         )
 
-    if tokenizer is None:
-        if untrained:
-            tokenizer = AutoTokenizer.from_pretrained(repo_args.model_name)
-            tokenizer.pad_token = tokenizer.eos_token
-        else:
-            raise ValueError("tokenizer must be provided if model is provided")
+    # if tokenizer is None:
+    #     if untrained:
+    #         tokenizer = AutoTokenizer.from_pretrained(repo_args.model_name)
+    #         tokenizer.pad_token = tokenizer.eos_token
+    #     else:
+    #         raise ValueError("tokenizer must be provided if model is provided")
 
     model.eval().cuda() if not no_cuda else model.eval()
 
@@ -767,7 +773,16 @@ def evaluate_main(
         # Load validation dataset from hugging face
         print(f"Loading {mtdt_name}\n@ {ds_id}...")
         n_examples = max_n_examples if not test else 10
-        vld_ds = load_dataset(ds_id, use_auth_token=True, split="validation")
+
+        try:
+            vld_ds = load_local_data(ds_id.split("/")[1])
+        except:
+            try:
+                vld_ds = load_local_data(
+                    ds_id,
+                )
+            except:
+                vld_ds = load_dataset(ds_id, use_auth_token=True, split="validation")
         vls_ds_len = len(vld_ds)
         print(f"{vls_ds_len} loaded for {mtdt_name}\n@ {ds_id}")
         n_examples = min(vls_ds_len, n_examples)
@@ -787,21 +802,24 @@ def evaluate_main(
             metadata_example["labels"] = metadata_example["input_ids"]
             metadata_batch = default_data_collator([metadata_example])
 
-            if not no_cuda:
-                normal_batch = {k: v.cuda() for k, v in normal_batch.items()}
-                metadata_batch = {k: v.cuda() for k, v in metadata_batch.items()}
+            if accelerator is not None:
+                normal_batch = {k: v.to(accelerator.device) for k, v in normal_batch.items()}
+                metadata_batch = {k: v.to(accelerator.device) for k, v in metadata_batch.items()}
+            # if not no_cuda:
+            #     normal_batch = {k: v.to(accelerator) for k, v in normal_batch.items()}
+            #     metadata_batch = {k: v.to(acc)) for k, v in metadata_batch.items()}
 
             # Calculate nll (natural-log loss)
             normal_nll, normal_example_len = get_mean_loss(
-                normal_batch,
-                save_data=save_data,
-                idx=idx,
+                normal_batch, save_data=save_data, idx=idx, model=model, tokenizer=tokenizer
             )
             metadata_nll, metadata_example_len = get_mean_loss(
                 metadata_batch,
                 save_data=save_data,
                 idx=idx,
                 additional_special_token_ids=tokenizer.additional_special_tokens_ids,
+                model=model,
+                tokenizer=tokenizer,
             )
 
             # Debug
