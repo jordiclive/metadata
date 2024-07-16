@@ -580,7 +580,7 @@ def evaluate_main(
     repo_id: str = None,
     subfolder: str = None,
     test: bool = False,
-    max_n_examples: int = 1500,
+    max_n_examples: int = 500,  # change for full eval
     prompt: bool = False,
     no_cuda: bool = True,
     save_data: bool = False,
@@ -936,7 +936,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_n_examples",
         type=int,
-        default=1500,
+        default=500,  # change for full eval
         help="how many examples per metadata type to evaluate",
     )
     parser.add_argument(
