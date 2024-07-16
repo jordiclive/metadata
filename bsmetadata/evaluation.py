@@ -525,6 +525,16 @@ def shorten_metadata_name(orig_name):
 #
 
 
+def strip_to_right_of_substring(s, substring):
+    # Split the string on the substring, getting at most 2 parts
+    parts = s.split(substring, 1)
+    # If the substring is found, return everything after it (including the substring itself)
+    if len(parts) > 1:
+        return substring + parts[1]
+    # If the substring is not found, return the original string
+    return s
+
+
 import os
 
 from datasets import load_from_disk
@@ -534,7 +544,7 @@ def dataset_info_local(dataset_id, output_folder="/home/jordan/MRs/metadata/outp
     """Check for dataset existence in the local output folder and provide basic info if present."""
     dataset_path = os.path.join(output_folder, dataset_id)
     if not os.path.exists(dataset_path) or os.listdir(dataset_path):
-        return False
+        raise ValueError(f"Dataset {dataset_id} not found in {output_folder}")
     else:
         return True
 
@@ -654,7 +664,14 @@ def evaluate_main(
             is_merged = False
 
     augmented_vld_dfs = []
+    ## Remove
+    # vld_ds_name_ids_dict = {k: v for k, v in vld_ds_name_ids_dict.items() if k in ["html"]}
+    ##
+    print("VLD_DS_NAME_IDS_DICT")
+    print(vld_ds_name_ids_dict)
     for mtdt_name, (raw_vld_ds_id, augmented_vld_ds_id) in vld_ds_name_ids_dict.items():
+        logger.info(mtdt_name)
+        logger.info(str(raw_vld_ds_id))
         try:
             print(f"Checking existence of {augmented_vld_ds_id}...")
             dataset_info_local(
@@ -662,12 +679,14 @@ def evaluate_main(
             )
         except Exception:
             try:
-                raw_vld_ds = load_local_data(raw_vld_ds.split("/")[1])
+                logger.info(f"LOADING !!!!! {raw_vld_ds_id}...")
+                raw_vld_ds = load_dataset(raw_vld_ds_id, use_auth_token=True, split="validation")
             except:
                 try:
-                    raw_vld_ds = load_local_data(raw_vld_ds)
+                    raw_vld_ds = load_local_data(raw_vld_ds_id.split("/")[1])
                 except:
-                    raw_vld_ds = load_dataset(raw_vld_ds_id, use_auth_token=True, split="validation")
+                    raw_vld_ds = load_local_data(raw_vld_ds_id)
+            logger.info("COMPLETED!!!!!!!!!!!!!!!!!!!!!!!")
             cols_to_remove = [
                 col for col in raw_vld_ds.column_names if col != "text" and not col.startswith("metadata_")
             ]
@@ -759,8 +778,8 @@ def evaluate_main(
     torch.set_printoptions(threshold=cfg.max_seq_len)  # For debugging
 
     results = {}
-    print("VLD_DS_NAME_IDS_DICT")
-    print(vld_ds_name_ids_dict)
+
+    vld_ds_name_ids_dict = {k: v for k, v in vld_ds_name_ids_dict.items() if k in ["html"]}
     for mtdt_name, (_, ds_id) in vld_ds_name_ids_dict.items():
         #         if mtdt_name != merged_mtdt_names:
         #             continue
@@ -773,7 +792,7 @@ def evaluate_main(
         # Load validation dataset from hugging face
         print(f"Loading {mtdt_name}\n@ {ds_id}...")
         n_examples = max_n_examples if not test else 10
-
+        ds_id = strip_to_right_of_substring(ds_id, "bs-modeling-metadata/")
         try:
             vld_ds = load_local_data(ds_id.split("/")[1])
         except:
